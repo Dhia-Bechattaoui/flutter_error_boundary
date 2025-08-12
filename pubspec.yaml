@@ -1,0 +1,33 @@
+name: flutter_error_boundary
+description: Error boundary widget that catches and handles errors gracefully in Flutter applications.
+version: 0.0.1
+homepage: https://github.com/Dhia-Bechattaoui/flutter_error_boundary
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  test: ^1.0.0
+  mockito: ^5.0.0
+  build_runner: ^2.0.0
+  coverage: ^1.0.0
+
+flutter:
+  # No assets needed for this package
+  
+# Pana analysis configuration
+pana:
+  # Ensure we get full score
+  dart_analyzer:
+    enabled: true
+  dart_code_metrics:
+    enabled: true
+  custom_analysis_options: true
