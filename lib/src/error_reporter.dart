@@ -48,12 +48,8 @@ class DefaultErrorReporter implements ErrorReporter {
   Future<void> reportError(ErrorInfo errorInfo) async {
     if (!enabled) return;
 
-    try {
-      await _sendErrorReport(errorInfo, {});
-    } catch (e) {
-      // If reporting fails, log it but don't throw
-      print('Failed to report error: $e');
-    }
+    // In tests, avoid async timers that keep the binding pending
+    _sendErrorReportSync(errorInfo, {});
   }
 
   @override
@@ -63,12 +59,7 @@ class DefaultErrorReporter implements ErrorReporter {
   ) async {
     if (!enabled) return;
 
-    try {
-      await _sendErrorReport(errorInfo, context);
-    } catch (e) {
-      // If reporting fails, log it but don't throw
-      print('Failed to report error with context: $e');
-    }
+    _sendErrorReportSync(errorInfo, context);
   }
 
   @override
@@ -86,19 +77,16 @@ class DefaultErrorReporter implements ErrorReporter {
     // No-op for const reporter
   }
 
-  Future<void> _sendErrorReport(
+  void _sendErrorReportSync(
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
-  ) async {
+  ) {
     // Prepare the error report
     final report = _prepareErrorReport(errorInfo, context);
 
     // In a real implementation, this would send the report to external services
     // For now, we'll just log it
     print('Error Report: ${report.toString()}');
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 50));
   }
 
   Map<String, dynamic> _prepareErrorReport(

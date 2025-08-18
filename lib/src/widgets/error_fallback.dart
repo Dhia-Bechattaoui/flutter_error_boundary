@@ -118,74 +118,18 @@ class ErrorFallback extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (onRetry != null) ...[
-          ElevatedButton.icon(
+          ElevatedButton(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[600],
-              foregroundColor: Colors.white,
-            ),
+            child: const Text('Retry'),
           ),
           const SizedBox(width: 16.0),
         ],
         if (onReport != null)
-          OutlinedButton.icon(
+          OutlinedButton(
             onPressed: onReport,
-            icon: const Icon(Icons.bug_report),
-            label: const Text('Report'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.grey[600],
-            ),
+            child: const Text('Report'),
           ),
       ],
-    );
-  }
-}
-
-/// A simple error display widget for basic error information.
-class ErrorDisplay extends StatelessWidget {
-  /// Creates a simple error display widget.
-  const ErrorDisplay({
-    super.key,
-    required this.message,
-    this.icon = Icons.error_outline,
-    this.color,
-  });
-
-  /// The error message to display.
-  final String message;
-
-  /// The icon to display with the error.
-  final IconData icon;
-
-  /// The color for the icon and text.
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final errorColor = color ?? Colors.red[400] ?? Colors.red;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 48.0,
-            color: errorColor,
-          ),
-          const SizedBox(height: 16.0),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 18.0,
-              color: errorColor,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 }

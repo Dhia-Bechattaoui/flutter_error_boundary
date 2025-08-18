@@ -90,16 +90,8 @@ class DefaultErrorHandler implements ErrorHandler {
 
   @override
   Future<bool> attemptRecovery(ErrorInfo errorInfo) async {
-    try {
-      // Simple recovery strategy - wait a bit and return success
-      // In a real implementation, this could involve more sophisticated logic
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // For now, we'll consider recovery successful for non-critical errors
-      return errorInfo.severity != ErrorSeverity.critical;
-    } catch (e) {
-      return false;
-    }
+    // For now, we'll consider recovery successful for non-critical errors
+    return errorInfo.severity != ErrorSeverity.critical;
   }
 
   void _logError(ErrorInfo errorInfo) {

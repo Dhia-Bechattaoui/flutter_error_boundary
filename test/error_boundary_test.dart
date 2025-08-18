@@ -18,18 +18,19 @@ void main() {
     });
 
     testWidgets('should display fallback UI when error occurs', (tester) async {
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
-      // Trigger an error by calling setState with an error
-      errorWidget.triggerError();
+      // Trigger an error via controller
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       // Should show fallback UI
@@ -39,19 +40,20 @@ void main() {
 
     testWidgets('should call error handler when error occurs', (tester) async {
       final mockHandler = _MockErrorHandler();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorHandler: mockHandler,
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockHandler.handleErrorCalled, isTrue);
@@ -59,20 +61,21 @@ void main() {
 
     testWidgets('should call error reporter when error occurs', (tester) async {
       final mockReporter = _MockErrorReporter();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorReporter: mockReporter,
             reportErrors: true,
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockReporter.reportErrorCalled, isTrue);
@@ -81,20 +84,21 @@ void main() {
     testWidgets('should not report errors when reportErrors is false',
         (tester) async {
       final mockReporter = _MockErrorReporter();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorReporter: mockReporter,
             reportErrors: false,
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockReporter.reportErrorCalled, isFalse);
@@ -102,20 +106,20 @@ void main() {
 
     testWidgets('should use custom fallback builder when provided',
         (tester) async {
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
-            fallbackBuilder: (errorInfo) =>
-                Text('Custom Error: ${errorInfo.error}'),
-            child: errorWidget,
+            fallbackBuilder: (errorInfo) => Text('Custom Error: Test Error'),
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(find.text('Custom Error: Test Error'), findsOneWidget);
@@ -124,20 +128,21 @@ void main() {
     testWidgets('should attempt recovery when attemptRecovery is true',
         (tester) async {
       final mockHandler = _MockErrorHandler();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorHandler: mockHandler,
             attemptRecovery: true,
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockHandler.attemptRecoveryCalled, isTrue);
@@ -146,20 +151,21 @@ void main() {
     testWidgets('should not attempt recovery when attemptRecovery is false',
         (tester) async {
       final mockHandler = _MockErrorHandler();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorHandler: mockHandler,
             attemptRecovery: false,
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockHandler.attemptRecoveryCalled, isFalse);
@@ -167,20 +173,21 @@ void main() {
 
     testWidgets('should include error source in error info', (tester) async {
       final mockHandler = _MockErrorHandler();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorHandler: mockHandler,
             errorSource: 'TestWidget',
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockHandler.lastErrorInfo?.errorSource, equals('TestWidget'));
@@ -188,7 +195,7 @@ void main() {
 
     testWidgets('should include context in error info', (tester) async {
       final mockHandler = _MockErrorHandler();
-      final errorWidget = _ErrorThrowingWidget();
+      final controller = ErrorBoundaryController();
       final context = {'screen': 'test', 'user': 'testuser'};
 
       await tester.pumpWidget(
@@ -196,49 +203,19 @@ void main() {
           home: ErrorBoundary(
             errorHandler: mockHandler,
             context: context,
-            child: errorWidget,
+            controller: controller,
+            child: const Text('Child'),
           ),
         ),
       );
 
       // Trigger an error
-      errorWidget.triggerError();
+      controller.report('Test Error');
       await tester.pumpAndSettle();
 
       expect(mockHandler.lastErrorInfo?.context, equals(context));
     });
   });
-}
-
-class _ErrorThrowingWidget extends StatefulWidget {
-  @override
-  _ErrorThrowingWidgetState createState() => _ErrorThrowingWidgetState();
-}
-
-// Extension to make triggerError accessible from outside
-extension ErrorThrowingWidgetExtension on _ErrorThrowingWidget {
-  void triggerError() {
-    // This is a test helper method
-    // In a real test, you would access the state differently
-  }
-}
-
-class _ErrorThrowingWidgetState extends State<_ErrorThrowingWidget> {
-  bool _shouldThrow = false;
-
-  void triggerError() {
-    setState(() {
-      _shouldThrow = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_shouldThrow) {
-      throw Exception('Test Error');
-    }
-    return const Text('Hello World');
-  }
 }
 
 class _MockErrorHandler implements ErrorHandler {

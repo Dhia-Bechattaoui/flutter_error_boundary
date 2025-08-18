@@ -6,8 +6,10 @@
 library flutter_error_boundary;
 
 export 'src/error_boundary.dart';
+export 'src/error_boundary_controller.dart';
 export 'src/error_boundary_builder.dart';
 export 'src/error_handler.dart';
 export 'src/error_reporter.dart';
 export 'src/error_types.dart';
 export 'src/widgets/error_fallback.dart';
+export 'src/widgets/error_display.dart';

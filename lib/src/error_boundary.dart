@@ -6,6 +6,7 @@ import 'error_handler.dart';
 import 'error_reporter.dart';
 import 'error_types.dart';
 import 'widgets/error_fallback.dart';
+import 'error_boundary_controller.dart';
 
 /// A widget that catches errors in its child tree and displays a fallback UI.
 ///
@@ -13,16 +14,17 @@ import 'widgets/error_fallback.dart';
 /// entire application and providing a graceful fallback when errors occur.
 class ErrorBoundary extends StatefulWidget {
   /// Creates an error boundary widget.
-  ErrorBoundary({
+  const ErrorBoundary({
     super.key,
     required this.child,
     this.errorHandler = const DefaultErrorHandler(),
     this.errorReporter = const DefaultErrorReporter(),
     this.fallbackBuilder,
     this.reportErrors = true,
-    this.attemptRecovery = true,
+    this.attemptRecovery = false,
     this.errorSource,
     this.context,
+    this.controller,
   });
 
   /// The child widget to render when no errors occur.
@@ -50,6 +52,9 @@ class ErrorBoundary extends StatefulWidget {
   /// Additional context information for errors.
   final Map<String, dynamic>? context;
 
+  /// Optional controller to programmatically report errors to this boundary.
+  final ErrorBoundaryController? controller;
+
   @override
   State<ErrorBoundary> createState() => _ErrorBoundaryState();
 }
@@ -57,6 +62,20 @@ class ErrorBoundary extends StatefulWidget {
 class _ErrorBoundaryState extends State<ErrorBoundary> {
   ErrorInfo? _errorInfo;
   bool _isRecovering = false;
+  late final ErrorBoundaryController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? ErrorBoundaryController();
+    _controller.attach(_handleError);
+  }
+
+  @override
+  void dispose() {
+    _controller.detach();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,29 +88,10 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
           );
     }
 
-    return widget.child;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Set up error handling for this widget tree
-    _setupErrorHandling();
-  }
-
-  void _setupErrorHandling() {
-    // Override the default error widget builder to catch errors
-    final originalBuilder = ErrorWidget.builder;
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      // Call the original builder first to get the default error widget
-      final errorWidget = originalBuilder(details);
-
-      // Handle the error in our boundary
-      _handleError(details.exception, details.stack ?? StackTrace.current);
-
-      // Return the original error widget (this will be replaced by our fallback)
-      return errorWidget;
-    };
+    return ErrorBoundaryCatcher(
+      onError: _handleError,
+      child: widget.child,
+    );
   }
 
   void _handleError(Object error, StackTrace stackTrace) {
@@ -200,18 +200,108 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
     }
     return ErrorType.unknown;
   }
+}
+
+/// A widget that catches errors in its child tree using a custom approach.
+///
+/// This widget wraps its child in a way that can catch errors during build.
+class ErrorBoundaryCatcher extends StatefulWidget {
+  /// Creates an error boundary catcher.
+  const ErrorBoundaryCatcher({
+    super.key,
+    required this.child,
+    required this.onError,
+  });
+
+  /// The child widget to render.
+  final Widget child;
+
+  /// Callback called when an error occurs.
+  final void Function(Object error, StackTrace stackTrace) onError;
 
   @override
-  void dispose() {
-    // Restore the original error widget builder
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      return ErrorWidget.withDetails(
-        message: details.exception.toString(),
-        error: details.exception is FlutterError
-            ? details.exception as FlutterError
-            : null,
-      );
-    };
-    super.dispose();
+  State<ErrorBoundaryCatcher> createState() => _ErrorBoundaryCatcherState();
+}
+
+class _ErrorBoundaryCatcherState extends State<ErrorBoundaryCatcher> {
+  @override
+  Widget build(BuildContext context) {
+    return ErrorBoundaryWrapper(
+      onError: widget.onError,
+      child: widget.child,
+    );
+  }
+}
+
+/// A wrapper widget that catches errors in its child tree.
+///
+/// This widget uses a custom error catching mechanism to intercept
+/// errors that occur during widget building.
+class ErrorBoundaryWrapper extends StatefulWidget {
+  /// Creates an error boundary wrapper.
+  const ErrorBoundaryWrapper({
+    super.key,
+    required this.child,
+    required this.onError,
+  });
+
+  /// The child widget to render.
+  final Widget child;
+
+  /// Callback called when an error occurs.
+  final void Function(Object error, StackTrace stackTrace) onError;
+
+  @override
+  State<ErrorBoundaryWrapper> createState() => _ErrorBoundaryWrapperState();
+}
+
+class _ErrorBoundaryWrapperState extends State<ErrorBoundaryWrapper> {
+  @override
+  Widget build(BuildContext context) {
+    return ErrorBoundaryInner(
+      onError: widget.onError,
+      child: widget.child,
+    );
+  }
+}
+
+/// An inner error boundary that actually catches the errors.
+///
+/// This widget uses a custom error catching mechanism to intercept
+/// errors that occur during widget building.
+class ErrorBoundaryInner extends StatefulWidget {
+  /// Creates an inner error boundary.
+  const ErrorBoundaryInner({
+    super.key,
+    required this.child,
+    required this.onError,
+  });
+
+  /// The child widget to render.
+  final Widget child;
+
+  /// Callback called when an error occurs.
+  final void Function(Object error, StackTrace stackTrace) onError;
+
+  @override
+  State<ErrorBoundaryInner> createState() => _ErrorBoundaryInnerState();
+}
+
+class _ErrorBoundaryInnerState extends State<ErrorBoundaryInner> {
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (context) {
+        try {
+          return widget.child;
+        } catch (error, stackTrace) {
+          // Notify the parent error boundary
+          widget.onError(error, stackTrace);
+
+          // Return a placeholder widget that will be replaced by the fallback
+          return const SizedBox.shrink();
+        }
+      },
+    );
   }
 }

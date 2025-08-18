@@ -26,7 +26,8 @@ class ErrorDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final errorColor = color ?? Colors.red[400] ?? Colors.red;
 
-    return Center(
+    return Container(
+      alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
