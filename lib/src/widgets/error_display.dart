@@ -1,5 +1,4 @@
-/// Simple error display widget for basic error information.
-library flutter_error_boundary.src.widgets.error_display;
+// Simple error display widget for basic error information.
 
 import 'package:flutter/material.dart';
 

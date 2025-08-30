@@ -1,5 +1,4 @@
-/// Error handling interface and implementations for the Flutter Error Boundary package.
-library flutter_error_boundary.src.error_handler;
+// Error handling interface and implementations for the Flutter Error Boundary package.
 
 import 'error_types.dart';
 

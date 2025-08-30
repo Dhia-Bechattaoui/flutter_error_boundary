@@ -1,5 +1,4 @@
-/// Error fallback widget that displays error information and provides recovery options.
-library flutter_error_boundary.src.widgets.error_fallback;
+// Error fallback widget that displays error information and provides recovery options.
 
 import 'package:flutter/material.dart';
 import '../error_types.dart';

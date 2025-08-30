@@ -1,5 +1,4 @@
-/// Core error types and interfaces for the Flutter Error Boundary package.
-library flutter_error_boundary.src.error_types;
+// Core error types and interfaces for the Flutter Error Boundary package.
 
 /// Represents an error that occurred within an error boundary.
 class BoundaryError {

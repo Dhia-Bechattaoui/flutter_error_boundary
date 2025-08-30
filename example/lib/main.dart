@@ -95,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
               const SizedBox(height: 10),
               // Example 2: Custom fallback
               ErrorBoundary(
+                child: _ErrorThrowingWidget(),
                 fallbackBuilder: (errorInfo) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -117,7 +118,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ),
-                child: _ErrorThrowingWidget(),
               ),
               const SizedBox(height: 20),
               const Text(

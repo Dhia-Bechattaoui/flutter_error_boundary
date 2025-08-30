@@ -1,5 +1,4 @@
-/// Main error boundary widget that catches and handles errors in the widget tree.
-library flutter_error_boundary.src.error_boundary;
+// Main error boundary widget that catches and handles errors in the widget tree.
 
 import 'package:flutter/material.dart';
 import 'error_handler.dart';

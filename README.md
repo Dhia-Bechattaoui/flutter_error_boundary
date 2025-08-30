@@ -7,6 +7,7 @@ A Flutter package that provides error boundary widgets to catch and handle error
 - 🛡️ **Error Catching**: Catches errors in the widget tree and prevents app crashes
 - 🎨 **Customizable Fallback UI**: Display custom error messages and recovery options
 - 📊 **Error Reporting**: Built-in error reporting to external services
+- ☁️ **Cloud Error Reporting**: Support for Sentry, Firebase Crashlytics, and custom HTTP endpoints
 - 🔄 **Error Recovery**: Automatic and manual error recovery mechanisms
 - 🎯 **Flexible Configuration**: Customizable error handling and reporting behavior
 - 🧪 **Comprehensive Testing**: Full test coverage for reliability
@@ -21,7 +22,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_error_boundary: ^0.0.1
+  flutter_error_boundary: ^0.0.2
 ```
 
 ### Basic Usage
@@ -56,6 +57,104 @@ ErrorBoundary(
   child: MyWidget(),
 )
 ```
+
+### Cloud Error Reporting
+
+The package supports reporting errors to various cloud services:
+
+#### Sentry Integration
+
+```dart
+import 'package:flutter_error_boundary/flutter_error_boundary.dart';
+
+final sentryReporter = SentryErrorReporter(
+  dsn: 'https://your-sentry-dsn@sentry.io/project-id',
+  projectId: 'your-project-id',
+  environment: 'production',
+  release: '1.0.0',
+);
+
+ErrorBoundary(
+  errorReporter: sentryReporter,
+  child: MyApp(),
+)
+```
+
+#### Firebase Crashlytics Integration
+
+```dart
+final firebaseReporter = FirebaseCrashlyticsReporter(
+  projectId: 'your-firebase-project-id',
+  apiKey: 'your-firebase-api-key',
+);
+
+ErrorBoundary(
+  errorReporter: firebaseReporter,
+  child: MyApp(),
+)
+```
+
+#### Custom HTTP Endpoint
+
+```dart
+final httpReporter = HttpErrorReporter(
+  endpoint: 'https://api.example.com/errors',
+  method: 'POST',
+  headers: {'Authorization': 'Bearer token'},
+  retryAttempts: 3,
+);
+
+ErrorBoundary(
+  errorReporter: httpReporter,
+  child: MyApp(),
+)
+```
+
+#### Composite Reporting
+
+Send errors to multiple services simultaneously:
+
+```dart
+final compositeReporter = CompositeErrorReporter(
+  reporters: [sentryReporter, firebaseReporter, httpReporter],
+  continueOnFailure: true,
+  parallelReporting: true,
+);
+
+ErrorBoundary(
+  errorReporter: compositeReporter,
+  child: MyApp(),
+)
+```
+
+#### Configuration Helpers
+
+Use the provided configuration helpers for common setups:
+
+```dart
+// Production environment
+final productionReporter = CloudErrorReporterConfig.createProductionReporter(
+  sentryDsn: 'https://your-sentry-dsn@sentry.io/project-id',
+  sentryProjectId: 'your-sentry-project-id',
+  firebaseProjectId: 'your-firebase-project-id',
+  firebaseApiKey: 'your-firebase-api-key',
+);
+
+// Development environment
+final devReporter = CloudErrorReporterConfig.createDevelopmentReporter(
+  httpEndpoint: 'http://localhost:3000/errors',
+  includeConsole: true,
+);
+
+// Staging environment
+final stagingReporter = CloudErrorReporterConfig.createStagingReporter(
+  sentryDsn: 'https://your-sentry-dsn@sentry.io/project-id',
+  sentryProjectId: 'your-sentry-project-id',
+  httpEndpoint: 'https://staging-api.example.com/errors',
+);
+```
+
+For detailed cloud error reporting documentation, see [CLOUD_ERROR_REPORTING.md](doc/CLOUD_ERROR_REPORTING.md).
 
 ### Using the Builder
 

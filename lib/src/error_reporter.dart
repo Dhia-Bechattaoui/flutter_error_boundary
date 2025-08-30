@@ -1,5 +1,4 @@
-/// Error reporting interface and implementations for the Flutter Error Boundary package.
-library flutter_error_boundary.src.error_reporter;
+// Error reporting interface and implementations for the Flutter Error Boundary package.
 
 import 'error_types.dart';
 

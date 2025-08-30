@@ -1,5 +1,4 @@
-/// Controller to programmatically notify an `ErrorBoundary` about errors.
-library flutter_error_boundary.src.error_boundary_controller;
+// Controller to programmatically notify an `ErrorBoundary` about errors.
 
 import 'error_types.dart';
 

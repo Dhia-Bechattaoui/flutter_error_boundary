@@ -1,5 +1,4 @@
-/// Builder class for creating error boundaries with custom configurations.
-library flutter_error_boundary.src.error_boundary_builder;
+// Builder class for creating error boundaries with custom configurations.
 
 import 'package:flutter/material.dart';
 import 'error_boundary.dart';
@@ -8,7 +7,6 @@ import 'error_reporter.dart';
 import 'error_types.dart';
 import 'widgets/error_fallback.dart';
 
-/// Builder class for creating error boundaries with custom configurations.
 class ErrorBoundaryBuilder {
   /// Creates a new error boundary builder.
   const ErrorBoundaryBuilder();
