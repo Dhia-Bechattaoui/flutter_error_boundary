@@ -63,4 +63,3 @@ class ConsoleErrorReporter implements ErrorReporter {
     developer.log('👤 User data cleared', name: 'ErrorReporter');
   }
 }
-

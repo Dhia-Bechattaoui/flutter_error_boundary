@@ -16,8 +16,9 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.35.7'
+        flutter-version: '3.32.0'
         channel: 'stable'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
@@ -25,14 +26,11 @@ jobs:
     - name: Analyze project source
       run: flutter analyze
 
-    - name: Run tests
-      run: flutter test
-
     - name: Run tests with coverage
       run: flutter test --coverage
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: coverage/lcov.info
         flags: unittests
@@ -48,8 +46,9 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.35.7'
+        flutter-version: '3.32.0'
         channel: 'stable'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
@@ -68,8 +67,9 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.35.7'
+        flutter-version: '3.32.0'
         channel: 'stable'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
@@ -86,14 +86,17 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.35.7'
+        flutter-version: '3.32.0'
         channel: 'stable'
+        cache: true
 
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Build package
-      run: flutter build
+    - name: Verify package can be imported
+      run: |
+        dart analyze lib/
+        flutter pub publish --dry-run
 
     - name: Verify package structure
       run: |

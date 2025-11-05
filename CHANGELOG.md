@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2025-11-05
+
+### Changed
+- **CI/CD**: Improved GitHub Actions workflow
+  - Added Flutter SDK caching to speed up CI runs
+  - Removed redundant test run (now runs tests with coverage only once)
+  - Updated Codecov action from v3 to v4
+  - Improved build job to verify package can be published (`flutter pub publish --dry-run`)
+  - Updated Flutter version from 3.35.7 to 3.32.0 to match minimum requirement
+
 ## [0.1.1] - 2025-11-05
 
 ### Fixed
