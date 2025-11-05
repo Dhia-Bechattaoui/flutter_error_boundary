@@ -32,7 +32,7 @@ class ConsoleErrorReporter implements ErrorReporter {
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
   ) async {
-    final Map<String, dynamic> combinedContext = {
+    final Map<String, dynamic> combinedContext = <String, dynamic>{
       ...?errorInfo.context,
       ...context,
     };

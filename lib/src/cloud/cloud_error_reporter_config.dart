@@ -2,7 +2,6 @@
 
 import '../error_reporter.dart';
 import 'cloud_error_reporters.dart';
-import 'console_error_reporter.dart';
 
 /// Configuration helper for setting up cloud error reporters.
 class CloudErrorReporterConfig {

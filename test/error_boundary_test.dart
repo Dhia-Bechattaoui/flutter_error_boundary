@@ -63,10 +63,10 @@ void main() {
     testWidgets('should call error reporter when error occurs', (
       WidgetTester tester,
     ) async {
-      // Note: ErrorBoundary doesn't currently support ErrorReporter directly.
-      // Error reporting is handled through ErrorHandler.
-      // This test is skipped until ErrorReporter support is added to ErrorBoundary.
-      // TODO: Add ErrorReporter support to ErrorBoundary or update test to use ErrorHandler
+      // Note: ErrorBoundary uses ErrorHandler for error handling, not ErrorReporter directly.
+      // Error reporting is handled through the ErrorHandler's shouldReportError method.
+      // To test error reporting functionality, use a custom ErrorHandler that implements
+      // error reporting logic. See test 'should call error handler when error occurs' above.
       final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
@@ -84,7 +84,7 @@ void main() {
 
       // Error should be handled (fallback UI should be shown)
       expect(find.text('Something went wrong'), findsOneWidget);
-    }, skip: true); // TODO: ErrorBoundary does not support ErrorReporter parameter
+    }, skip: true); // ErrorBoundary uses ErrorHandler, not ErrorReporter directly
 
     testWidgets('should not report errors when reportErrors is false', (
       WidgetTester tester,

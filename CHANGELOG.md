@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-11-05
+
+### Fixed
+- **Linter**: Removed unnecessary import of `console_error_reporter.dart` in `cloud_error_reporter_config.dart`
+- **Linter**: Added explicit type annotation to `combinedContext` map in `console_error_reporter.dart`
+- **Tests**: Removed TODO comment and improved documentation in error reporter test
+
 ## [0.1.0] - 2025-11-05
 
 ### Added
