@@ -29,7 +29,7 @@ void main() {
         final ErrorBoundary widget = ErrorBoundary(child: Text('Test $i'));
 
         // Verify widget was created successfully
-        expect(widget.child, isA<Container>());
+        expect(widget.child, isA<Text>());
         stopwatch.stop();
         times.add(stopwatch.elapsedMicroseconds);
       }

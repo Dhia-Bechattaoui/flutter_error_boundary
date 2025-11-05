@@ -2,6 +2,7 @@
 
 import '../error_reporter.dart';
 import 'cloud_error_reporters.dart';
+import 'console_error_reporter.dart';
 
 /// Configuration helper for setting up cloud error reporters.
 class CloudErrorReporterConfig {
@@ -81,6 +82,10 @@ class CloudErrorReporterConfig {
     bool includeConsole = true,
   }) {
     final List<ErrorReporter> reporters = <ErrorReporter>[];
+
+    if (includeConsole) {
+      reporters.add(const ConsoleErrorReporter());
+    }
 
     if (httpEndpoint != null) {
       final HttpErrorReporter httpReporter = createHttpReporter(

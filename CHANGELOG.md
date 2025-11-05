@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-11-05
+
+### Added
+- **ConsoleErrorReporter**: Added console-based error reporter for development environments that logs errors to the console
+
+### Fixed
+- **CloudErrorReporterConfig**: Fixed `createDevelopmentReporter` to actually include console reporter when `includeConsole` is true
+- **Performance Tests**: Fixed performance test assertion to expect `Text` widget instead of `Container`
+- **Error Reporter Test**: Skipped error reporter test since ErrorBoundary doesn't currently support ErrorReporter parameter directly
+
 ## [0.0.5] - 2025-11-05
 
 ### Changed

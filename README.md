@@ -24,7 +24,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_error_boundary: ^0.0.5
+  flutter_error_boundary: ^0.0.6
 ```
 
 ### Basic Usage
