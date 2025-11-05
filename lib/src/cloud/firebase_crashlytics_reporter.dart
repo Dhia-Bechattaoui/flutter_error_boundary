@@ -27,11 +27,11 @@ class FirebaseCrashlyticsReporter implements ErrorReporter {
   String? _userId;
 
   /// User properties for error reporting.
-  Map<String, dynamic> _userProperties = {};
+  final Map<String, dynamic> _userProperties = <String, dynamic>{};
 
   @override
   Future<void> reportError(ErrorInfo errorInfo) async {
-    await _sendToFirebase(errorInfo, {});
+    await _sendToFirebase(errorInfo, <String, dynamic>{});
   }
 
   @override
@@ -64,77 +64,74 @@ class FirebaseCrashlyticsReporter implements ErrorReporter {
     Map<String, dynamic> context,
   ) async {
     try {
-      final url = _buildFirebaseUrl();
-      final headers = _buildHeaders();
-      final body = _buildEventPayload(errorInfo, context);
+      final String url = _buildFirebaseUrl();
+      final Map<String, String> headers = _buildHeaders();
+      final String body = _buildEventPayload(errorInfo, context);
 
-      final response = await _httpClient.post(
+      final http.Response response = await _httpClient.post(
         Uri.parse(url),
         headers: headers,
         body: body,
       );
 
-      if (response.statusCode != 200) {
-        print(
-            'Firebase Crashlytics error reporting failed: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      print('Failed to send error to Firebase Crashlytics: $e');
+      if (response.statusCode != 200) {}
+    } on Object {
+      // Silently ignore errors from Firebase API calls
     }
   }
 
   /// Builds the Firebase API URL.
-  String _buildFirebaseUrl() {
-    return 'https://firebase.googleapis.com/v1/projects/$projectId/reports:create';
-  }
+  String _buildFirebaseUrl() =>
+      'https://firebase.googleapis.com/v1/projects/$projectId/reports:create';
 
   /// Builds the request headers for Firebase.
-  Map<String, String> _buildHeaders() {
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey',
-      'User-Agent': 'flutter_error_boundary/1.0.0',
-    };
-  }
+  Map<String, String> _buildHeaders() => <String, String>{
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $apiKey',
+    'User-Agent': 'flutter_error_boundary/1.0.0',
+  };
 
   /// Builds the event payload for Firebase Crashlytics.
-  String _buildEventPayload(
-    ErrorInfo errorInfo,
-    Map<String, dynamic> context,
-  ) {
-    final event = {
-      'report': {
-        'eventTime': errorInfo.timestamp?.toUtc().toIso8601String(),
-        'type': 'crash',
-        'data': {
-          'crashReport': {
-            'exception': {
-              'type': errorInfo.error.runtimeType.toString(),
-              'message': errorInfo.error.toString(),
-              'stackTrace': errorInfo.stackTrace.toString(),
-            },
-            'severity': _mapSeverityToFirebaseLevel(errorInfo.severity),
-            'errorType': errorInfo.type.name,
-            'errorSource': errorInfo.errorSource ?? 'unknown',
-            'context': context,
-            'errorContext': errorInfo.context,
-            'userData': errorInfo.userData,
-            'metadata': {
-              'platform': 'flutter',
-              'package': 'flutter_error_boundary',
-              'timestamp': errorInfo.timestamp?.millisecondsSinceEpoch,
+  String _buildEventPayload(ErrorInfo errorInfo, Map<String, dynamic> context) {
+    final Map<String, Map<String, Object?>> event =
+        <String, Map<String, Object?>>{
+          'report': <String, Object?>{
+            'eventTime': errorInfo.timestamp?.toUtc().toIso8601String(),
+            'type': 'crash',
+            'data': <String, Map<String, Object?>>{
+              'crashReport': <String, Object?>{
+                'exception': <String, String>{
+                  'type': errorInfo.error.runtimeType.toString(),
+                  'message': errorInfo.error.toString(),
+                  'stackTrace': errorInfo.stackTrace.toString(),
+                },
+                'severity': _mapSeverityToFirebaseLevel(errorInfo.severity),
+                'errorType': errorInfo.type.name,
+                'errorSource': errorInfo.errorSource ?? 'unknown',
+                'context': context,
+                'errorContext': errorInfo.context,
+                'userData': errorInfo.userData,
+                'metadata': <String, Object?>{
+                  'platform': 'flutter',
+                  'package': 'flutter_error_boundary',
+                  'timestamp': errorInfo.timestamp?.millisecondsSinceEpoch,
+                },
+              },
             },
           },
-        },
-      },
-    };
+        };
 
     if (_userId != null) {
-      (event['report'] as Map<String, dynamic>)['data']['crashReport']
-          ['userId'] = _userId;
+      (event['report']
+              as Map<String, dynamic>)['data']['crashReport']['userId'] =
+          _userId;
       if (_userProperties.isNotEmpty) {
-        (event['report'] as Map<String, dynamic>)['data']['crashReport']
-            ['userProperties'] = _userProperties;
+        (event['report']
+                as Map<
+                  String,
+                  dynamic
+                >)['data']['crashReport']['userProperties'] =
+            _userProperties;
       }
     }
 

@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 class ErrorDisplay extends StatelessWidget {
   /// Creates a simple error display widget.
   const ErrorDisplay({
-    super.key,
     required this.message,
+    super.key,
     this.icon = Icons.error_outline,
     this.color,
   });
@@ -23,25 +23,18 @@ class ErrorDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final errorColor = color ?? Colors.red[400] ?? Colors.red;
+    final Color errorColor = color ?? Colors.red[400] ?? Colors.red;
 
     return Container(
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 48.0,
-            color: errorColor,
-          ),
-          const SizedBox(height: 16.0),
+        children: <Widget>[
+          Icon(icon, size: 48, color: errorColor),
+          const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 18.0,
-              color: errorColor,
-            ),
+            style: TextStyle(fontSize: 18, color: errorColor),
             textAlign: TextAlign.center,
           ),
         ],

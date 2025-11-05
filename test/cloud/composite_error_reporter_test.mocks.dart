@@ -32,14 +32,13 @@ class MockErrorReporter extends _i1.Mock implements _i2.ErrorReporter {
   }
 
   @override
-  _i3.Future<void> reportError(_i4.ErrorInfo? errorInfo) => (super.noSuchMethod(
-        Invocation.method(
-          #reportError,
-          [errorInfo],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+  _i3.Future<void> reportError(_i4.ErrorInfo? errorInfo) =>
+      (super.noSuchMethod(
+            Invocation.method(#reportError, [errorInfo]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 
   @override
   _i3.Future<void> reportErrorWithContext(
@@ -47,42 +46,28 @@ class MockErrorReporter extends _i1.Mock implements _i2.ErrorReporter {
     Map<String, dynamic>? context,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #reportErrorWithContext,
-          [
-            errorInfo,
-            context,
-          ],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+            Invocation.method(#reportErrorWithContext, [errorInfo, context]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 
   @override
   void setUserIdentifier(String? userId) => super.noSuchMethod(
-        Invocation.method(
-          #setUserIdentifier,
-          [userId],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#setUserIdentifier, [userId]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void setUserProperties(Map<String, dynamic>? properties) =>
       super.noSuchMethod(
-        Invocation.method(
-          #setUserProperties,
-          [properties],
-        ),
+        Invocation.method(#setUserProperties, [properties]),
         returnValueForMissingStub: null,
       );
 
   @override
   void clearUserData() => super.noSuchMethod(
-        Invocation.method(
-          #clearUserData,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#clearUserData, []),
+    returnValueForMissingStub: null,
+  );
 }

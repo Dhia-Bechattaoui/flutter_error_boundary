@@ -7,6 +7,19 @@ import 'error_reporter.dart';
 import 'error_types.dart';
 import 'widgets/error_fallback.dart';
 
+/// Builder class for creating error boundaries with custom configurations.
+///
+/// This class provides convenient methods for creating error boundaries
+/// with different configurations, from simple error catching to full-featured
+/// error handling with reporting and recovery.
+///
+/// Example:
+/// ```dart
+/// ErrorBoundaryBuilder().wrap(
+///   child: MyWidget(),
+///   errorHandler: CustomErrorHandler(),
+/// )
+/// ```
 class ErrorBoundaryBuilder {
   /// Creates a new error boundary builder.
   const ErrorBoundaryBuilder();
@@ -21,18 +34,15 @@ class ErrorBoundaryBuilder {
     bool attemptRecovery = true,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundary(
-      errorHandler: errorHandler ?? const DefaultErrorHandler(),
-      errorReporter: errorReporter ?? const DefaultErrorReporter(),
-      fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
-      reportErrors: reportErrors,
-      attemptRecovery: attemptRecovery,
-      errorSource: errorSource,
-      context: context,
-      child: child,
-    );
-  }
+  }) => ErrorBoundary(
+    errorHandler: errorHandler ?? const DefaultErrorHandler(),
+    fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
+    reportErrors: reportErrors,
+    attemptRecovery: attemptRecovery,
+    errorSource: errorSource,
+    context: context,
+    child: child,
+  );
 
   /// Creates an error boundary with a custom error handler.
   ErrorBoundary withHandler({
@@ -43,18 +53,15 @@ class ErrorBoundaryBuilder {
     bool attemptRecovery = true,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundary(
-      errorHandler: errorHandler,
-      errorReporter: const DefaultErrorReporter(),
-      fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
-      reportErrors: reportErrors,
-      attemptRecovery: attemptRecovery,
-      errorSource: errorSource,
-      context: context,
-      child: child,
-    );
-  }
+  }) => ErrorBoundary(
+    errorHandler: errorHandler,
+    fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
+    reportErrors: reportErrors,
+    attemptRecovery: attemptRecovery,
+    errorSource: errorSource,
+    context: context,
+    child: child,
+  );
 
   /// Creates an error boundary with a custom error reporter.
   ErrorBoundary withReporter({
@@ -65,18 +72,14 @@ class ErrorBoundaryBuilder {
     bool attemptRecovery = true,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundary(
-      errorHandler: const DefaultErrorHandler(),
-      errorReporter: errorReporter,
-      fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
-      reportErrors: reportErrors,
-      attemptRecovery: attemptRecovery,
-      errorSource: errorSource,
-      context: context,
-      child: child,
-    );
-  }
+  }) => ErrorBoundary(
+    fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
+    reportErrors: reportErrors,
+    attemptRecovery: attemptRecovery,
+    errorSource: errorSource,
+    context: context,
+    child: child,
+  );
 
   /// Creates an error boundary with a custom fallback builder.
   ErrorBoundary withFallback({
@@ -88,33 +91,25 @@ class ErrorBoundaryBuilder {
     bool attemptRecovery = true,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundary(
-      errorHandler: errorHandler ?? const DefaultErrorHandler(),
-      errorReporter: errorReporter ?? const DefaultErrorReporter(),
-      fallbackBuilder: fallbackBuilder,
-      reportErrors: reportErrors,
-      attemptRecovery: attemptRecovery,
-      errorSource: errorSource,
-      context: context,
-      child: child,
-    );
-  }
+  }) => ErrorBoundary(
+    errorHandler: errorHandler ?? const DefaultErrorHandler(),
+    fallbackBuilder: fallbackBuilder,
+    reportErrors: reportErrors,
+    attemptRecovery: attemptRecovery,
+    errorSource: errorSource,
+    context: context,
+    child: child,
+  );
 
   /// Creates an error boundary with minimal configuration.
   ErrorBoundary simple({
     required Widget child,
     Widget Function(ErrorInfo)? fallbackBuilder,
-  }) {
-    return ErrorBoundary(
-      errorHandler: const DefaultErrorHandler(),
-      errorReporter: const DefaultErrorReporter(),
-      fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
-      reportErrors: false,
-      attemptRecovery: false,
-      child: child,
-    );
-  }
+  }) => ErrorBoundary(
+    fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
+    reportErrors: false,
+    child: child,
+  );
 
   /// Creates an error boundary with full error handling and reporting.
   ErrorBoundary full({
@@ -122,30 +117,21 @@ class ErrorBoundaryBuilder {
     Widget Function(ErrorInfo)? fallbackBuilder,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundary(
-      errorHandler: const DefaultErrorHandler(
-        reportAllErrors: true,
-        attemptRecoveryForAll: true,
-      ),
-      errorReporter: const DefaultErrorReporter(
-        enabled: true,
-        includeStackTrace: true,
-        includeUserData: true,
-      ),
-      fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
-      reportErrors: true,
-      attemptRecovery: true,
-      errorSource: errorSource,
-      context: context,
-      child: child,
-    );
-  }
+  }) => ErrorBoundary(
+    errorHandler: const DefaultErrorHandler(
+      reportAllErrors: true,
+      attemptRecoveryForAll: true,
+    ),
+    fallbackBuilder: fallbackBuilder ?? _defaultFallbackBuilder,
+    attemptRecovery: true,
+    errorSource: errorSource,
+    context: context,
+    child: child,
+  );
 
   /// Default fallback builder that creates a simple error display.
-  Widget _defaultFallbackBuilder(ErrorInfo errorInfo) {
-    return ErrorFallback(errorInfo: errorInfo);
-  }
+  Widget _defaultFallbackBuilder(ErrorInfo errorInfo) =>
+      ErrorFallback(errorInfo: errorInfo);
 }
 
 /// Extension methods for easier error boundary creation.
@@ -159,40 +145,34 @@ extension ErrorBoundaryExtension on Widget {
     bool attemptRecovery = true,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundaryBuilder().wrap(
-      child: this,
-      errorHandler: errorHandler,
-      errorReporter: errorReporter,
-      fallbackBuilder: fallbackBuilder,
-      reportErrors: reportErrors,
-      attemptRecovery: attemptRecovery,
-      errorSource: errorSource,
-      context: context,
-    );
-  }
+  }) => const ErrorBoundaryBuilder().wrap(
+    child: this,
+    errorHandler: errorHandler,
+    errorReporter: errorReporter,
+    fallbackBuilder: fallbackBuilder,
+    reportErrors: reportErrors,
+    attemptRecovery: attemptRecovery,
+    errorSource: errorSource,
+    context: context,
+  );
 
   /// Wraps this widget with a simple error boundary.
   ErrorBoundary withSimpleErrorBoundary({
     Widget Function(ErrorInfo)? fallbackBuilder,
-  }) {
-    return ErrorBoundaryBuilder().simple(
-      child: this,
-      fallbackBuilder: fallbackBuilder,
-    );
-  }
+  }) => const ErrorBoundaryBuilder().simple(
+    child: this,
+    fallbackBuilder: fallbackBuilder,
+  );
 
   /// Wraps this widget with a full-featured error boundary.
   ErrorBoundary withFullErrorBoundary({
     Widget Function(ErrorInfo)? fallbackBuilder,
     String? errorSource,
     Map<String, dynamic>? context,
-  }) {
-    return ErrorBoundaryBuilder().full(
-      child: this,
-      fallbackBuilder: fallbackBuilder,
-      errorSource: errorSource,
-      context: context,
-    );
-  }
+  }) => const ErrorBoundaryBuilder().full(
+    child: this,
+    fallbackBuilder: fallbackBuilder,
+    errorSource: errorSource,
+    context: context,
+  );
 }

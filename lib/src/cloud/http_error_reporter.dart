@@ -11,7 +11,7 @@ class HttpErrorReporter implements ErrorReporter {
   HttpErrorReporter({
     required this.endpoint,
     this.method = 'POST',
-    this.headers = const {},
+    this.headers = const <String, String>{},
     this.timeout = const Duration(seconds: 30),
     this.retryAttempts = 3,
     this.retryDelay = const Duration(seconds: 1),
@@ -43,11 +43,11 @@ class HttpErrorReporter implements ErrorReporter {
   String? _userId;
 
   /// User properties for error reporting.
-  Map<String, dynamic> _userProperties = {};
+  final Map<String, dynamic> _userProperties = <String, dynamic>{};
 
   @override
   Future<void> reportError(ErrorInfo errorInfo) async {
-    await _sendHttpRequest(errorInfo, {});
+    await _sendHttpRequest(errorInfo, <String, dynamic>{});
   }
 
   @override
@@ -83,25 +83,23 @@ class HttpErrorReporter implements ErrorReporter {
 
     while (attempts < retryAttempts) {
       try {
-        final response = await _makeHttpRequest(errorInfo, context);
+        final http.Response response = await _makeHttpRequest(
+          errorInfo,
+          context,
+        );
 
         if (response.statusCode >= 200 && response.statusCode < 300) {
           // Success
           return;
-        } else {
-          print(
-              'HTTP error reporting failed: ${response.statusCode} - ${response.body}');
-        }
-      } catch (e) {
+        } else {}
+      } on Object {
         attempts++;
         if (attempts >= retryAttempts) {
-          print(
-              'Failed to send error via HTTP after $retryAttempts attempts: $e');
           return;
         }
 
         // Wait before retrying
-        await Future.delayed(retryDelay);
+        await Future<void>.delayed(retryDelay);
       }
     }
   }
@@ -111,46 +109,34 @@ class HttpErrorReporter implements ErrorReporter {
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
   ) async {
-    final uri = Uri.parse(endpoint);
-    final requestHeaders = _buildHeaders();
-    final body = _buildRequestBody(errorInfo, context);
+    final Uri uri = Uri.parse(endpoint);
+    final Map<String, String> requestHeaders = _buildHeaders();
+    final String body = _buildRequestBody(errorInfo, context);
 
     switch (method.toUpperCase()) {
       case 'GET':
-        final queryParams = _buildQueryParams(errorInfo, context);
-        final getUri = uri.replace(queryParameters: queryParams);
-        return await _httpClient
-            .get(
-              getUri,
-              headers: requestHeaders,
-            )
+        final Map<String, String> queryParams = _buildQueryParams(
+          errorInfo,
+          context,
+        );
+        final Uri getUri = uri.replace(queryParameters: queryParams);
+        return _httpClient
+            .get(getUri, headers: requestHeaders)
             .timeout(timeout);
 
       case 'POST':
-        return await _httpClient
-            .post(
-              uri,
-              headers: requestHeaders,
-              body: body,
-            )
+        return _httpClient
+            .post(uri, headers: requestHeaders, body: body)
             .timeout(timeout);
 
       case 'PUT':
-        return await _httpClient
-            .put(
-              uri,
-              headers: requestHeaders,
-              body: body,
-            )
+        return _httpClient
+            .put(uri, headers: requestHeaders, body: body)
             .timeout(timeout);
 
       case 'PATCH':
-        return await _httpClient
-            .patch(
-              uri,
-              headers: requestHeaders,
-              body: body,
-            )
+        return _httpClient
+            .patch(uri, headers: requestHeaders, body: body)
             .timeout(timeout);
 
       default:
@@ -160,41 +146,39 @@ class HttpErrorReporter implements ErrorReporter {
 
   /// Builds the request headers.
   Map<String, String> _buildHeaders() {
-    final defaultHeaders = {
+    final Map<String, String> defaultHeaders = <String, String>{
       'Content-Type': 'application/json',
       'User-Agent': 'flutter_error_boundary/1.0.0',
     };
 
-    return {...defaultHeaders, ...headers};
+    return <String, String>{...defaultHeaders, ...headers};
   }
 
   /// Builds the request body for POST/PUT/PATCH requests.
-  String _buildRequestBody(
-    ErrorInfo errorInfo,
-    Map<String, dynamic> context,
-  ) {
-    final payload = {
-      'error': {
-        'type': errorInfo.error.runtimeType.toString(),
-        'message': errorInfo.error.toString(),
-        'stackTrace': errorInfo.stackTrace.toString(),
-        'severity': errorInfo.severity.name,
-        'errorType': errorInfo.type.name,
-        'errorSource': errorInfo.errorSource,
-        'timestamp': errorInfo.timestamp?.toIso8601String(),
-      },
-      'context': context,
-      'errorContext': errorInfo.context,
-      'userData': errorInfo.userData,
-      'metadata': {
-        'platform': 'flutter',
-        'package': 'flutter_error_boundary',
-        'version': '1.0.0',
-      },
-    };
+  String _buildRequestBody(ErrorInfo errorInfo, Map<String, dynamic> context) {
+    final Map<String, Map<String, dynamic>?> payload =
+        <String, Map<String, dynamic>?>{
+          'error': <String, String?>{
+            'type': errorInfo.error.runtimeType.toString(),
+            'message': errorInfo.error.toString(),
+            'stackTrace': errorInfo.stackTrace.toString(),
+            'severity': errorInfo.severity.name,
+            'errorType': errorInfo.type.name,
+            'errorSource': errorInfo.errorSource,
+            'timestamp': errorInfo.timestamp?.toIso8601String(),
+          },
+          'context': context,
+          'errorContext': errorInfo.context,
+          'userData': errorInfo.userData,
+          'metadata': <String, String>{
+            'platform': 'flutter',
+            'package': 'flutter_error_boundary',
+            'version': '1.0.0',
+          },
+        };
 
     if (_userId != null) {
-      payload['user'] = {
+      payload['user'] = <String, dynamic>{
         'id': _userId,
         'properties': _userProperties,
       };
@@ -208,7 +192,7 @@ class HttpErrorReporter implements ErrorReporter {
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
   ) {
-    final params = <String, String>{
+    final Map<String, String> params = <String, String>{
       'error_type': errorInfo.error.runtimeType.toString(),
       'error_message': errorInfo.error.toString(),
       'severity': errorInfo.severity.name,
@@ -221,7 +205,7 @@ class HttpErrorReporter implements ErrorReporter {
     }
 
     // Add context as query parameters (limited to simple string values)
-    context.forEach((key, value) {
+    context.forEach((String key, Object? value) {
       if (value is String || value is num || value is bool) {
         params['ctx_$key'] = value.toString();
       }

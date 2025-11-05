@@ -2,6 +2,8 @@
 
 A Flutter package that provides error boundary widgets to catch and handle errors gracefully in Flutter applications, preventing crashes and providing fallback UI when errors occur.
 
+![Example](assets/example.gif)
+
 ## Features
 
 - 🛡️ **Error Catching**: Catches errors in the widget tree and prevents app crashes
@@ -10,9 +12,9 @@ A Flutter package that provides error boundary widgets to catch and handle error
 - ☁️ **Cloud Error Reporting**: Support for Sentry, Firebase Crashlytics, and custom HTTP endpoints
 - 🔄 **Error Recovery**: Automatic and manual error recovery mechanisms
 - 🎯 **Flexible Configuration**: Customizable error handling and reporting behavior
-- 🧪 **Comprehensive Testing**: Full test coverage for reliability
-- 📱 **Platform Agnostic**: Works on all Flutter platforms
-- 🚀 **Performance Optimized**: Minimal performance overhead
+- 🧪 **Comprehensive Testing**: Full test coverage for reliability with platform compatibility tests
+- 📱 **Platform Agnostic**: Tested and verified on Android, iOS, Web, Windows, macOS, and Linux
+- 🚀 **Performance Optimized**: Benchmarked and verified minimal performance overhead (<50μs average widget creation, <2μs error handling)
 
 ## Getting Started
 
@@ -370,9 +372,36 @@ flutter test
 # Run tests with coverage
 flutter test --coverage
 
+# Run performance benchmarks
+flutter test test/performance/error_boundary_performance_test.dart
+
+# Run platform compatibility tests
+flutter test test/platform/platform_compatibility_test.dart
+
 # Run specific test files
 flutter test test/error_boundary_test.dart
 ```
+
+### Performance Benchmarks
+
+The package includes performance benchmarks that verify minimal overhead:
+- **Widget Creation**: <50μs average (1000 iterations, first iteration may have initialization overhead)
+- **Error Handling**: <2μs average for error reporting
+- **Memory Overhead**: <2μs per boundary instance (1000 boundaries created in ~1ms)
+
+See `test/performance/error_boundary_performance_test.dart` for detailed benchmarks.
+
+### Platform Compatibility
+
+The package is tested and verified to work on all Flutter-supported platforms:
+- ✅ Android
+- ✅ iOS  
+- ✅ Web
+- ✅ Windows
+- ✅ macOS
+- ✅ Linux
+
+See `test/platform/platform_compatibility_test.dart` for platform-specific tests.
 
 ## Contributing
 

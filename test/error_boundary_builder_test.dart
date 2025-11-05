@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_error_boundary/flutter_error_boundary.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ErrorBoundaryBuilder', () {
@@ -12,7 +12,9 @@ void main() {
 
     group('wrap', () {
       test('should create error boundary with default values', () {
-        final errorBoundary = builder.wrap(child: Text('Test'));
+        final ErrorBoundary errorBoundary = builder.wrap(
+          child: const Text('Test'),
+        );
 
         expect(errorBoundary, isA<ErrorBoundary>());
         expect(errorBoundary.child, isA<Text>());
@@ -21,52 +23,53 @@ void main() {
       });
 
       test('should create error boundary with custom values', () {
-        final customHandler = _MockErrorHandler();
-        final customReporter = _MockErrorReporter();
-        final customFallback = (ErrorInfo errorInfo) => Text('Custom Error');
+        final _MockErrorHandler customHandler = _MockErrorHandler();
+        final _MockErrorReporter customReporter = _MockErrorReporter();
+        Text customFallback(ErrorInfo errorInfo) => const Text('Custom Error');
 
-        final errorBoundary = builder.wrap(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.wrap(
+          child: const Text('Test'),
           errorHandler: customHandler,
           errorReporter: customReporter,
           fallbackBuilder: customFallback,
           reportErrors: false,
           attemptRecovery: false,
           errorSource: 'TestWidget',
-          context: {'screen': 'test'},
+          context: <String, dynamic>{'screen': 'test'},
         );
 
         expect(errorBoundary.errorHandler, equals(customHandler));
-        expect(errorBoundary.errorReporter, equals(customReporter));
         expect(errorBoundary.fallbackBuilder, equals(customFallback));
         expect(errorBoundary.reportErrors, isFalse);
         expect(errorBoundary.attemptRecovery, isFalse);
         expect(errorBoundary.errorSource, equals('TestWidget'));
-        expect(errorBoundary.context, equals({'screen': 'test'}));
+        expect(
+          errorBoundary.context,
+          equals(<String, String>{'screen': 'test'}),
+        );
       });
     });
 
     group('withHandler', () {
       test('should create error boundary with custom handler', () {
-        final customHandler = _MockErrorHandler();
+        final _MockErrorHandler customHandler = _MockErrorHandler();
 
-        final errorBoundary = builder.withHandler(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.withHandler(
+          child: const Text('Test'),
           errorHandler: customHandler,
         );
 
         expect(errorBoundary.errorHandler, equals(customHandler));
-        expect(errorBoundary.errorReporter, isA<DefaultErrorReporter>());
         expect(errorBoundary.reportErrors, isTrue);
         expect(errorBoundary.attemptRecovery, isTrue);
       });
 
       test('should create error boundary with custom handler and fallback', () {
-        final customHandler = _MockErrorHandler();
-        final customFallback = (ErrorInfo errorInfo) => Text('Custom Error');
+        final _MockErrorHandler customHandler = _MockErrorHandler();
+        Text customFallback(ErrorInfo errorInfo) => const Text('Custom Error');
 
-        final errorBoundary = builder.withHandler(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.withHandler(
+          child: const Text('Test'),
           errorHandler: customHandler,
           fallbackBuilder: customFallback,
         );
@@ -78,55 +81,55 @@ void main() {
 
     group('withReporter', () {
       test('should create error boundary with custom reporter', () {
-        final customReporter = _MockErrorReporter();
+        final _MockErrorReporter customReporter = _MockErrorReporter();
 
-        final errorBoundary = builder.withReporter(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.withReporter(
+          child: const Text('Test'),
           errorReporter: customReporter,
         );
 
-        expect(errorBoundary.errorReporter, equals(customReporter));
         expect(errorBoundary.errorHandler, isA<DefaultErrorHandler>());
         expect(errorBoundary.reportErrors, isTrue);
         expect(errorBoundary.attemptRecovery, isTrue);
       });
 
-      test('should create error boundary with custom reporter and fallback',
-          () {
-        final customReporter = _MockErrorReporter();
-        final customFallback = (ErrorInfo errorInfo) => Text('Custom Error');
+      test(
+        'should create error boundary with custom reporter and fallback',
+        () {
+          final _MockErrorReporter customReporter = _MockErrorReporter();
+          Text customFallback(ErrorInfo errorInfo) =>
+              const Text('Custom Error');
 
-        final errorBoundary = builder.withReporter(
-          child: Text('Test'),
-          errorReporter: customReporter,
-          fallbackBuilder: customFallback,
-        );
+          final ErrorBoundary errorBoundary = builder.withReporter(
+            child: const Text('Test'),
+            errorReporter: customReporter,
+            fallbackBuilder: customFallback,
+          );
 
-        expect(errorBoundary.errorReporter, equals(customReporter));
-        expect(errorBoundary.fallbackBuilder, equals(customFallback));
-      });
+          expect(errorBoundary.fallbackBuilder, equals(customFallback));
+        },
+      );
     });
 
     group('withFallback', () {
       test('should create error boundary with custom fallback', () {
-        final customFallback = (ErrorInfo errorInfo) => Text('Custom Error');
+        Text customFallback(ErrorInfo errorInfo) => const Text('Custom Error');
 
-        final errorBoundary = builder.withFallback(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.withFallback(
+          child: const Text('Test'),
           fallbackBuilder: customFallback,
         );
 
         expect(errorBoundary.fallbackBuilder, equals(customFallback));
         expect(errorBoundary.errorHandler, isA<DefaultErrorHandler>());
-        expect(errorBoundary.errorReporter, isA<DefaultErrorReporter>());
       });
 
       test('should create error boundary with custom fallback and handler', () {
-        final customFallback = (ErrorInfo errorInfo) => Text('Custom Error');
-        final customHandler = _MockErrorHandler();
+        Text customFallback(ErrorInfo errorInfo) => const Text('Custom Error');
+        final _MockErrorHandler customHandler = _MockErrorHandler();
 
-        final errorBoundary = builder.withFallback(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.withFallback(
+          child: const Text('Test'),
           fallbackBuilder: customFallback,
           errorHandler: customHandler,
         );
@@ -138,7 +141,9 @@ void main() {
 
     group('simple', () {
       test('should create simple error boundary', () {
-        final errorBoundary = builder.simple(child: Text('Test'));
+        final ErrorBoundary errorBoundary = builder.simple(
+          child: const Text('Test'),
+        );
 
         expect(errorBoundary, isA<ErrorBoundary>());
         expect(errorBoundary.reportErrors, isFalse);
@@ -146,10 +151,10 @@ void main() {
       });
 
       test('should create simple error boundary with custom fallback', () {
-        final customFallback = (ErrorInfo errorInfo) => Text('Custom Error');
+        Text customFallback(ErrorInfo errorInfo) => const Text('Custom Error');
 
-        final errorBoundary = builder.simple(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.simple(
+          child: const Text('Test'),
           fallbackBuilder: customFallback,
         );
 
@@ -159,7 +164,9 @@ void main() {
 
     group('full', () {
       test('should create full-featured error boundary', () {
-        final errorBoundary = builder.full(child: Text('Test'));
+        final ErrorBoundary errorBoundary = builder.full(
+          child: const Text('Test'),
+        );
 
         expect(errorBoundary, isA<ErrorBoundary>());
         expect(errorBoundary.reportErrors, isTrue);
@@ -167,22 +174,25 @@ void main() {
       });
 
       test('should create full-featured error boundary with custom values', () {
-        final errorBoundary = builder.full(
-          child: Text('Test'),
+        final ErrorBoundary errorBoundary = builder.full(
+          child: const Text('Test'),
           errorSource: 'TestWidget',
-          context: {'screen': 'test'},
+          context: <String, dynamic>{'screen': 'test'},
         );
 
         expect(errorBoundary.errorSource, equals('TestWidget'));
-        expect(errorBoundary.context, equals({'screen': 'test'}));
+        expect(
+          errorBoundary.context,
+          equals(<String, String>{'screen': 'test'}),
+        );
       });
     });
   });
 
   group('ErrorBoundaryExtension', () {
     test('withErrorBoundary should wrap widget with error boundary', () {
-      final widget = Text('Test');
-      final errorBoundary = widget.withErrorBoundary();
+      const Text widget = Text('Test');
+      final ErrorBoundary errorBoundary = widget.withErrorBoundary();
 
       expect(errorBoundary, isA<ErrorBoundary>());
       expect(errorBoundary.child, equals(widget));
@@ -191,52 +201,57 @@ void main() {
     });
 
     test('withErrorBoundary should use custom values', () {
-      final widget = Text('Test');
-      final customHandler = _MockErrorHandler();
-      final customReporter = _MockErrorReporter();
+      const Text widget = Text('Test');
+      final _MockErrorHandler customHandler = _MockErrorHandler();
+      final _MockErrorReporter customReporter = _MockErrorReporter();
 
-      final errorBoundary = widget.withErrorBoundary(
+      final ErrorBoundary errorBoundary = widget.withErrorBoundary(
         errorHandler: customHandler,
         errorReporter: customReporter,
         reportErrors: false,
         attemptRecovery: false,
         errorSource: 'TestWidget',
-        context: {'screen': 'test'},
+        context: <String, dynamic>{'screen': 'test'},
       );
 
       expect(errorBoundary.errorHandler, equals(customHandler));
-      expect(errorBoundary.errorReporter, equals(customReporter));
       expect(errorBoundary.reportErrors, isFalse);
       expect(errorBoundary.attemptRecovery, isFalse);
       expect(errorBoundary.errorSource, equals('TestWidget'));
-      expect(errorBoundary.context, equals({'screen': 'test'}));
+      expect(errorBoundary.context, equals(<String, String>{'screen': 'test'}));
     });
 
     test(
-        'withSimpleErrorBoundary should wrap widget with simple error boundary',
-        () {
-      final widget = Text('Test');
-      final errorBoundary = widget.withSimpleErrorBoundary();
+      'withSimpleErrorBoundary should wrap widget with simple error boundary',
+      () {
+        const Text widget = Text('Test');
+        final ErrorBoundary errorBoundary = widget.withSimpleErrorBoundary();
 
-      expect(errorBoundary, isA<ErrorBoundary>());
-      expect(errorBoundary.reportErrors, isFalse);
-      expect(errorBoundary.attemptRecovery, isFalse);
-    });
+        expect(errorBoundary, isA<ErrorBoundary>());
+        expect(errorBoundary.reportErrors, isFalse);
+        expect(errorBoundary.attemptRecovery, isFalse);
+      },
+    );
 
-    test('withFullErrorBoundary should wrap widget with full error boundary',
-        () {
-      final widget = Text('Test');
-      final errorBoundary = widget.withFullErrorBoundary(
-        errorSource: 'TestWidget',
-        context: {'screen': 'test'},
-      );
+    test(
+      'withFullErrorBoundary should wrap widget with full error boundary',
+      () {
+        const Text widget = Text('Test');
+        final ErrorBoundary errorBoundary = widget.withFullErrorBoundary(
+          errorSource: 'TestWidget',
+          context: <String, dynamic>{'screen': 'test'},
+        );
 
-      expect(errorBoundary, isA<ErrorBoundary>());
-      expect(errorBoundary.reportErrors, isTrue);
-      expect(errorBoundary.attemptRecovery, isTrue);
-      expect(errorBoundary.errorSource, equals('TestWidget'));
-      expect(errorBoundary.context, equals({'screen': 'test'}));
-    });
+        expect(errorBoundary, isA<ErrorBoundary>());
+        expect(errorBoundary.reportErrors, isTrue);
+        expect(errorBoundary.attemptRecovery, isTrue);
+        expect(errorBoundary.errorSource, equals('TestWidget'));
+        expect(
+          errorBoundary.context,
+          equals(<String, String>{'screen': 'test'}),
+        );
+      },
+    );
   });
 }
 

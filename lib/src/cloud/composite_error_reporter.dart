@@ -10,7 +10,7 @@ class CompositeErrorReporter implements ErrorReporter {
     required List<ErrorReporter> reporters,
     this.continueOnFailure = true,
     this.parallelReporting = true,
-  }) : _reporters = List.unmodifiable(reporters);
+  }) : _reporters = List<ErrorReporter>.unmodifiable(reporters);
 
   /// The list of error reporters to use.
   final List<ErrorReporter> _reporters;
@@ -23,7 +23,7 @@ class CompositeErrorReporter implements ErrorReporter {
 
   @override
   Future<void> reportError(ErrorInfo errorInfo) async {
-    await _reportToAll(errorInfo, {});
+    await _reportToAll(errorInfo, <String, dynamic>{});
   }
 
   @override
@@ -36,36 +36,33 @@ class CompositeErrorReporter implements ErrorReporter {
 
   @override
   void setUserIdentifier(String userId) {
-    for (final reporter in _reporters) {
+    for (final ErrorReporter reporter in _reporters) {
       try {
         reporter.setUserIdentifier(userId);
-      } catch (e) {
-        print(
-            'Failed to set user identifier on reporter ${reporter.runtimeType}: $e');
+      } on Object {
+        // Silently ignore errors from individual reporters
       }
     }
   }
 
   @override
   void setUserProperties(Map<String, dynamic> properties) {
-    for (final reporter in _reporters) {
+    for (final ErrorReporter reporter in _reporters) {
       try {
         reporter.setUserProperties(properties);
-      } catch (e) {
-        print(
-            'Failed to set user properties on reporter ${reporter.runtimeType}: $e');
+      } on Object {
+        // Silently ignore errors from individual reporters
       }
     }
   }
 
   @override
   void clearUserData() {
-    for (final reporter in _reporters) {
+    for (final ErrorReporter reporter in _reporters) {
       try {
         reporter.clearUserData();
-      } catch (e) {
-        print(
-            'Failed to clear user data on reporter ${reporter.runtimeType}: $e');
+      } on Object {
+        // Silently ignore errors from individual reporters
       }
     }
   }
@@ -75,7 +72,9 @@ class CompositeErrorReporter implements ErrorReporter {
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
   ) async {
-    if (_reporters.isEmpty) return;
+    if (_reporters.isEmpty) {
+      return;
+    }
 
     if (parallelReporting) {
       await _reportInParallel(errorInfo, context);
@@ -89,15 +88,15 @@ class CompositeErrorReporter implements ErrorReporter {
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
   ) async {
-    final futures = <Future<void>>[];
+    final List<Future<void>> futures = <Future<void>>[];
 
-    for (final reporter in _reporters) {
+    for (final ErrorReporter reporter in _reporters) {
       futures.add(_reportWithErrorHandling(reporter, errorInfo, context));
     }
 
     if (continueOnFailure) {
       // Wait for all to complete, but don't fail if some do
-      await Future.wait(futures, eagerError: false);
+      await Future.wait(futures);
     } else {
       // Wait for all to complete and fail if any do
       await Future.wait(futures);
@@ -109,10 +108,10 @@ class CompositeErrorReporter implements ErrorReporter {
     ErrorInfo errorInfo,
     Map<String, dynamic> context,
   ) async {
-    for (final reporter in _reporters) {
+    for (final ErrorReporter reporter in _reporters) {
       try {
         await _reportWithErrorHandling(reporter, errorInfo, context);
-      } catch (e) {
+      } on Object {
         if (!continueOnFailure) {
           rethrow;
         }
@@ -133,8 +132,7 @@ class CompositeErrorReporter implements ErrorReporter {
       } else {
         await reporter.reportErrorWithContext(errorInfo, context);
       }
-    } catch (e) {
-      print('Error reporter ${reporter.runtimeType} failed: $e');
+    } on Object {
       if (!continueOnFailure) {
         rethrow;
       }
@@ -145,11 +143,15 @@ class CompositeErrorReporter implements ErrorReporter {
   int get reporterCount => _reporters.length;
 
   /// Gets a copy of the configured reporters.
-  List<ErrorReporter> get reporters => List.unmodifiable(_reporters);
+  List<ErrorReporter> get reporters =>
+      List<ErrorReporter>.unmodifiable(_reporters);
 
   /// Adds a new reporter to the composite.
   CompositeErrorReporter addReporter(ErrorReporter reporter) {
-    final newReporters = [..._reporters, reporter];
+    final List<ErrorReporter> newReporters = <ErrorReporter>[
+      ..._reporters,
+      reporter,
+    ];
     return CompositeErrorReporter(
       reporters: newReporters,
       continueOnFailure: continueOnFailure,
@@ -159,7 +161,9 @@ class CompositeErrorReporter implements ErrorReporter {
 
   /// Removes a reporter from the composite.
   CompositeErrorReporter removeReporter(ErrorReporter reporter) {
-    final newReporters = _reporters.where((r) => r != reporter).toList();
+    final List<ErrorReporter> newReporters = _reporters
+        .where((ErrorReporter r) => r != reporter)
+        .toList();
     return CompositeErrorReporter(
       reporters: newReporters,
       continueOnFailure: continueOnFailure,
@@ -171,11 +175,9 @@ class CompositeErrorReporter implements ErrorReporter {
   CompositeErrorReporter withSettings({
     bool? continueOnFailure,
     bool? parallelReporting,
-  }) {
-    return CompositeErrorReporter(
-      reporters: _reporters,
-      continueOnFailure: continueOnFailure ?? this.continueOnFailure,
-      parallelReporting: parallelReporting ?? this.parallelReporting,
-    );
-  }
+  }) => CompositeErrorReporter(
+    reporters: _reporters,
+    continueOnFailure: continueOnFailure ?? this.continueOnFailure,
+    parallelReporting: parallelReporting ?? this.parallelReporting,
+  );
 }

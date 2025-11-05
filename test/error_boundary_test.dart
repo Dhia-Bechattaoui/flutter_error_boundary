@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_error_boundary/flutter_error_boundary.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ErrorBoundary', () {
-    testWidgets('should render child widget when no error occurs',
-        (tester) async {
+    testWidgets('should render child widget when no error occurs', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorBoundary(
-            child: const Text('Hello World'),
-          ),
-        ),
+        const MaterialApp(home: ErrorBoundary(child: Text('Hello World'))),
       );
 
       expect(find.text('Hello World'), findsOneWidget);
     });
 
-    testWidgets('should display fallback UI when error occurs', (tester) async {
-      final controller = ErrorBoundaryController();
+    testWidgets('should display fallback UI when error occurs', (
+      WidgetTester tester,
+    ) async {
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -38,9 +37,11 @@ void main() {
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
-    testWidgets('should call error handler when error occurs', (tester) async {
-      final mockHandler = _MockErrorHandler();
-      final controller = ErrorBoundaryController();
+    testWidgets('should call error handler when error occurs', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorHandler mockHandler = _MockErrorHandler();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -59,15 +60,15 @@ void main() {
       expect(mockHandler.handleErrorCalled, isTrue);
     });
 
-    testWidgets('should call error reporter when error occurs', (tester) async {
-      final mockReporter = _MockErrorReporter();
-      final controller = ErrorBoundaryController();
+    testWidgets('should call error reporter when error occurs', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorReporter mockReporter = _MockErrorReporter();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
-            errorReporter: mockReporter,
-            reportErrors: true,
             controller: controller,
             child: const Text('Child'),
           ),
@@ -81,15 +82,15 @@ void main() {
       expect(mockReporter.reportErrorCalled, isTrue);
     });
 
-    testWidgets('should not report errors when reportErrors is false',
-        (tester) async {
-      final mockReporter = _MockErrorReporter();
-      final controller = ErrorBoundaryController();
+    testWidgets('should not report errors when reportErrors is false', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorReporter mockReporter = _MockErrorReporter();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
-            errorReporter: mockReporter,
             reportErrors: false,
             controller: controller,
             child: const Text('Child'),
@@ -104,14 +105,16 @@ void main() {
       expect(mockReporter.reportErrorCalled, isFalse);
     });
 
-    testWidgets('should use custom fallback builder when provided',
-        (tester) async {
-      final controller = ErrorBoundaryController();
+    testWidgets('should use custom fallback builder when provided', (
+      WidgetTester tester,
+    ) async {
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
-            fallbackBuilder: (errorInfo) => Text('Custom Error: Test Error'),
+            fallbackBuilder: (ErrorInfo errorInfo) =>
+                const Text('Custom Error: Test Error'),
             controller: controller,
             child: const Text('Child'),
           ),
@@ -125,10 +128,11 @@ void main() {
       expect(find.text('Custom Error: Test Error'), findsOneWidget);
     });
 
-    testWidgets('should attempt recovery when attemptRecovery is true',
-        (tester) async {
-      final mockHandler = _MockErrorHandler();
-      final controller = ErrorBoundaryController();
+    testWidgets('should attempt recovery when attemptRecovery is true', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorHandler mockHandler = _MockErrorHandler();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -148,16 +152,16 @@ void main() {
       expect(mockHandler.attemptRecoveryCalled, isTrue);
     });
 
-    testWidgets('should not attempt recovery when attemptRecovery is false',
-        (tester) async {
-      final mockHandler = _MockErrorHandler();
-      final controller = ErrorBoundaryController();
+    testWidgets('should not attempt recovery when attemptRecovery is false', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorHandler mockHandler = _MockErrorHandler();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
           home: ErrorBoundary(
             errorHandler: mockHandler,
-            attemptRecovery: false,
             controller: controller,
             child: const Text('Child'),
           ),
@@ -171,9 +175,11 @@ void main() {
       expect(mockHandler.attemptRecoveryCalled, isFalse);
     });
 
-    testWidgets('should include error source in error info', (tester) async {
-      final mockHandler = _MockErrorHandler();
-      final controller = ErrorBoundaryController();
+    testWidgets('should include error source in error info', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorHandler mockHandler = _MockErrorHandler();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -193,10 +199,15 @@ void main() {
       expect(mockHandler.lastErrorInfo?.errorSource, equals('TestWidget'));
     });
 
-    testWidgets('should include context in error info', (tester) async {
-      final mockHandler = _MockErrorHandler();
-      final controller = ErrorBoundaryController();
-      final context = {'screen': 'test', 'user': 'testuser'};
+    testWidgets('should include context in error info', (
+      WidgetTester tester,
+    ) async {
+      final _MockErrorHandler mockHandler = _MockErrorHandler();
+      final ErrorBoundaryController controller = ErrorBoundaryController();
+      final Map<String, String> context = <String, String>{
+        'screen': 'test',
+        'user': 'testuser',
+      };
 
       await tester.pumpWidget(
         MaterialApp(

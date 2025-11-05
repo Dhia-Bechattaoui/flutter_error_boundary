@@ -321,7 +321,6 @@ class CloudErrorReportingApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: ErrorBoundary(
-        errorReporter: errorReporter,
         fallbackBuilder: (errorInfo) {
           return Scaffold(
             appBar: AppBar(

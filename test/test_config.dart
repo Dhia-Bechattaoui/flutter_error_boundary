@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_error_boundary/flutter_error_boundary.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Test configuration and utilities for the flutter_error_boundary package.
 class TestConfig {
@@ -19,18 +19,16 @@ class TestConfig {
     DateTime? timestamp,
     Map<String, dynamic>? context,
     Map<String, dynamic>? userData,
-  }) {
-    return ErrorInfo(
-      error: error ?? Exception('Test error'),
-      stackTrace: stackTrace ?? StackTrace.current,
-      severity: severity ?? ErrorSeverity.medium,
-      type: type ?? ErrorType.unknown,
-      errorSource: errorSource ?? 'TestWidget',
-      timestamp: timestamp ?? DateTime.now(),
-      context: context ?? {'test': true},
-      userData: userData ?? {'testUser': true},
-    );
-  }
+  }) => ErrorInfo(
+    error: error ?? Exception('Test error'),
+    stackTrace: stackTrace ?? StackTrace.current,
+    severity: severity ?? ErrorSeverity.medium,
+    type: type ?? ErrorType.unknown,
+    errorSource: errorSource ?? 'TestWidget',
+    timestamp: timestamp ?? DateTime.now(),
+    context: context ?? <String, dynamic>{'test': true},
+    userData: userData ?? <String, dynamic>{'testUser': true},
+  );
 
   /// Creates a test boundary error with default values.
   static BoundaryError createTestBoundaryError({
@@ -38,14 +36,12 @@ class TestConfig {
     StackTrace? stackTrace,
     String? errorSource,
     DateTime? timestamp,
-  }) {
-    return BoundaryError(
-      error: error ?? Exception('Test error'),
-      stackTrace: stackTrace ?? StackTrace.current,
-      errorSource: errorSource ?? 'TestWidget',
-      timestamp: timestamp ?? DateTime.now(),
-    );
-  }
+  }) => BoundaryError(
+    error: error ?? Exception('Test error'),
+    stackTrace: stackTrace ?? StackTrace.current,
+    errorSource: errorSource ?? 'TestWidget',
+    timestamp: timestamp ?? DateTime.now(),
+  );
 
   /// Waits for the specified duration and pumps the widget.
   static Future<void> pumpAndWait(
@@ -57,14 +53,10 @@ class TestConfig {
   }
 
   /// Creates a mock error handler for testing.
-  static MockErrorHandler createMockErrorHandler() {
-    return MockErrorHandler();
-  }
+  static MockErrorHandler createMockErrorHandler() => MockErrorHandler();
 
   /// Creates a mock error reporter for testing.
-  static MockErrorReporter createMockErrorReporter() {
-    return MockErrorReporter();
-  }
+  static MockErrorReporter createMockErrorReporter() => MockErrorReporter();
 }
 
 /// Mock error handler for testing.

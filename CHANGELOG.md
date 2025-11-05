@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.0.3] - 2025-01-05
+
+### Fixed
+- **Example App**: Fixed examples 1-6 to properly demonstrate ErrorBoundary features using ErrorBoundaryController
+- **Error Recovery**: Fixed automatic recovery clearing errors immediately, preventing error UI from displaying
+- **Error Display**: Added ErrorWidget.builder to show user-friendly error UI instead of Flutter's default red screen for build-time errors
+- **Linter Errors**: Fixed all linter errors in cloud error reporter implementations
+  - Fixed catch clauses to use explicit exception types (`on Object`)
+  - Added missing type annotations
+  - Fixed unused catch clause warnings
+  - Converted block function bodies to expression function bodies where appropriate
+
+### Enhanced
+- **Debug Logging**: Added comprehensive debug logging to ErrorBoundary and ErrorBoundaryController for better debugging
+- **ErrorBoundaryController**: Enhanced controller with debug logging to track listener attachment and error reporting
+- **Example App**: Improved example app to demonstrate all ErrorBoundary features correctly
+  - Examples 1-6 now use ErrorBoundaryController for programmatic error reporting
+  - Example 7 demonstrates programmatic error reporting with controller
+  - All examples now properly show ErrorBoundary's fallback UI
+
+### Technical Improvements
+- Added `mounted` check before calling `setState` in ErrorBoundary to prevent errors on disposed widgets
+- Added `didUpdateWidget` method to handle controller changes in ErrorBoundary
+- Improved error handling flow to prevent race conditions
+- Enhanced example widgets to use controller pattern instead of throwing in build method
+
 ## [0.0.2] - 2025-08-30
 
 ### Added

@@ -7,8 +7,8 @@ import '../error_types.dart';
 class ErrorFallback extends StatelessWidget {
   /// Creates an error fallback widget.
   const ErrorFallback({
-    super.key,
     required this.errorInfo,
+    super.key,
     this.onRetry,
     this.onReport,
     this.showDetails = false,
@@ -27,45 +27,36 @@ class ErrorFallback extends StatelessWidget {
   final bool showDetails;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildErrorIcon(),
-            const SizedBox(height: 16.0),
-            _buildErrorMessage(),
-            const SizedBox(height: 16.0),
-            _buildErrorDetails(),
-            const SizedBox(height: 24.0),
-            _buildActionButtons(),
-          ],
-        ),
+  Widget build(BuildContext context) => Material(
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildErrorIcon(),
+          const SizedBox(height: 16),
+          _buildErrorMessage(),
+          const SizedBox(height: 16),
+          _buildErrorDetails(),
+          const SizedBox(height: 24),
+          _buildActionButtons(),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildErrorIcon() {
-    return Icon(
-      Icons.error_outline,
-      size: 64.0,
-      color: Colors.red[400],
-    );
-  }
+  Widget _buildErrorIcon() =>
+      Icon(Icons.error_outline, size: 64, color: Colors.red[400]);
 
-  Widget _buildErrorMessage() {
-    return Text(
-      'Something went wrong',
-      style: TextStyle(
-        fontSize: 24.0,
-        fontWeight: FontWeight.bold,
-        color: Colors.grey[800],
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
+  Widget _buildErrorMessage() => Text(
+    'Something went wrong',
+    style: TextStyle(
+      fontSize: 24,
+      fontWeight: FontWeight.bold,
+      color: Colors.grey[800],
+    ),
+    textAlign: TextAlign.center,
+  );
 
   Widget _buildErrorDetails() {
     if (!showDetails) {
@@ -73,14 +64,14 @@ class ErrorFallback extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Text(
             'Error Details:',
             style: TextStyle(
@@ -88,7 +79,7 @@ class ErrorFallback extends StatelessWidget {
               color: Colors.grey[700],
             ),
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 8),
           Text(
             'Type: ${errorInfo.type.name}',
             style: TextStyle(color: Colors.grey[600]),
@@ -112,23 +103,15 @@ class ErrorFallback extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (onRetry != null) ...[
-          ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Retry'),
-          ),
-          const SizedBox(width: 16.0),
-        ],
-        if (onReport != null)
-          OutlinedButton(
-            onPressed: onReport,
-            child: const Text('Report'),
-          ),
+  Widget _buildActionButtons() => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      if (onRetry != null) ...<Widget>[
+        ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+        const SizedBox(width: 16),
       ],
-    );
-  }
+      if (onReport != null)
+        OutlinedButton(onPressed: onReport, child: const Text('Report')),
+    ],
+  );
 }

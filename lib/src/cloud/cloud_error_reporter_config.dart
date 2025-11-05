@@ -15,43 +15,34 @@ class CloudErrorReporterConfig {
     String environment = 'production',
     String? release,
     String? serverName,
-  }) {
-    return SentryErrorReporter(
-      dsn: dsn,
-      projectId: projectId,
-      environment: environment,
-      release: release,
-      serverName: serverName,
-    );
-  }
+  }) => SentryErrorReporter(
+    dsn: dsn,
+    projectId: projectId,
+    environment: environment,
+    release: release,
+    serverName: serverName,
+  );
 
   /// Creates a Firebase Crashlytics reporter with common configuration.
   static FirebaseCrashlyticsReporter createFirebaseReporter({
     required String projectId,
     required String apiKey,
-  }) {
-    return FirebaseCrashlyticsReporter(
-      projectId: projectId,
-      apiKey: apiKey,
-    );
-  }
+  }) => FirebaseCrashlyticsReporter(projectId: projectId, apiKey: apiKey);
 
   /// Creates an HTTP error reporter with common configuration.
   static HttpErrorReporter createHttpReporter({
     required String endpoint,
     String method = 'POST',
-    Map<String, String> headers = const {},
+    Map<String, String> headers = const <String, String>{},
     Duration timeout = const Duration(seconds: 30),
     int retryAttempts = 3,
-  }) {
-    return HttpErrorReporter(
-      endpoint: endpoint,
-      method: method,
-      headers: headers,
-      timeout: timeout,
-      retryAttempts: retryAttempts,
-    );
-  }
+  }) => HttpErrorReporter(
+    endpoint: endpoint,
+    method: method,
+    headers: headers,
+    timeout: timeout,
+    retryAttempts: retryAttempts,
+  );
 
   /// Creates a composite reporter with Sentry and Firebase.
   static CompositeErrorReporter createProductionReporter({
@@ -64,20 +55,20 @@ class CloudErrorReporterConfig {
     bool continueOnFailure = true,
     bool parallelReporting = true,
   }) {
-    final sentryReporter = createSentryReporter(
+    final SentryErrorReporter sentryReporter = createSentryReporter(
       dsn: sentryDsn,
       projectId: sentryProjectId,
       environment: environment,
       release: release,
     );
 
-    final firebaseReporter = createFirebaseReporter(
+    final FirebaseCrashlyticsReporter firebaseReporter = createFirebaseReporter(
       projectId: firebaseProjectId,
       apiKey: firebaseApiKey,
     );
 
     return CompositeErrorReporter(
-      reporters: [sentryReporter, firebaseReporter],
+      reporters: <ErrorReporter>[sentryReporter, firebaseReporter],
       continueOnFailure: continueOnFailure,
       parallelReporting: parallelReporting,
     );
@@ -86,18 +77,13 @@ class CloudErrorReporterConfig {
   /// Creates a development reporter with console logging and optional HTTP endpoint.
   static CompositeErrorReporter createDevelopmentReporter({
     String? httpEndpoint,
-    Map<String, String> httpHeaders = const {},
+    Map<String, String> httpHeaders = const <String, String>{},
     bool includeConsole = true,
   }) {
-    final reporters = <ErrorReporter>[];
-
-    if (includeConsole) {
-      // Use the default reporter for console logging
-      reporters.add(const DefaultErrorReporter());
-    }
+    final List<ErrorReporter> reporters = <ErrorReporter>[];
 
     if (httpEndpoint != null) {
-      final httpReporter = createHttpReporter(
+      final HttpErrorReporter httpReporter = createHttpReporter(
         endpoint: httpEndpoint,
         headers: httpHeaders,
         retryAttempts: 1, // Fewer retries in development
@@ -107,7 +93,6 @@ class CloudErrorReporterConfig {
 
     return CompositeErrorReporter(
       reporters: reporters,
-      continueOnFailure: true,
       parallelReporting:
           false, // Sequential in development for easier debugging
     );
@@ -118,13 +103,13 @@ class CloudErrorReporterConfig {
     required String sentryDsn,
     required String sentryProjectId,
     String? httpEndpoint,
-    Map<String, String> httpHeaders = const {},
+    Map<String, String> httpHeaders = const <String, String>{},
     String environment = 'staging',
     String? release,
   }) {
-    final reporters = <ErrorReporter>[];
+    final List<ErrorReporter> reporters = <ErrorReporter>[];
 
-    final sentryReporter = createSentryReporter(
+    final SentryErrorReporter sentryReporter = createSentryReporter(
       dsn: sentryDsn,
       projectId: sentryProjectId,
       environment: environment,
@@ -133,7 +118,7 @@ class CloudErrorReporterConfig {
     reporters.add(sentryReporter);
 
     if (httpEndpoint != null) {
-      final httpReporter = createHttpReporter(
+      final HttpErrorReporter httpReporter = createHttpReporter(
         endpoint: httpEndpoint,
         headers: httpHeaders,
         retryAttempts: 2,
@@ -141,11 +126,7 @@ class CloudErrorReporterConfig {
       reporters.add(httpReporter);
     }
 
-    return CompositeErrorReporter(
-      reporters: reporters,
-      continueOnFailure: true,
-      parallelReporting: true,
-    );
+    return CompositeErrorReporter(reporters: reporters);
   }
 
   /// Creates a custom composite reporter with specified reporters.
@@ -153,11 +134,9 @@ class CloudErrorReporterConfig {
     required List<ErrorReporter> reporters,
     bool continueOnFailure = true,
     bool parallelReporting = true,
-  }) {
-    return CompositeErrorReporter(
-      reporters: reporters,
-      continueOnFailure: continueOnFailure,
-      parallelReporting: parallelReporting,
-    );
-  }
+  }) => CompositeErrorReporter(
+    reporters: reporters,
+    continueOnFailure: continueOnFailure,
+    parallelReporting: parallelReporting,
+  );
 }

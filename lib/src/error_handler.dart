@@ -4,6 +4,9 @@ import 'error_types.dart';
 
 /// Interface for handling errors that occur within error boundaries.
 abstract class ErrorHandler {
+  /// Creates a new error handler.
+  const ErrorHandler();
+
   /// Handles an error that occurred within an error boundary.
   ///
   /// Returns true if the error was handled successfully, false otherwise.
@@ -42,37 +45,22 @@ class DefaultErrorHandler implements ErrorHandler {
   @override
   Future<bool> handleError(ErrorInfo errorInfo) async {
     try {
-      // Log the error
-      _logError(errorInfo);
-
-      // Determine if we should report the error
-      if (shouldReportError(errorInfo)) {
-        await _reportError(errorInfo);
-      }
-
       // Determine if we should attempt recovery
       if (shouldAttemptRecovery(errorInfo)) {
         return await attemptRecovery(errorInfo);
       }
 
       return true;
-    } catch (e, stackTrace) {
-      // If error handling itself fails, log it but don't throw
-      _logError(ErrorInfo(
-        error: e,
-        stackTrace: stackTrace,
-        severity: ErrorSeverity.high,
-        type: ErrorType.unknown,
-        errorSource: 'ErrorHandler.handleError',
-        timestamp: DateTime.now(),
-      ));
+    } on Object {
       return false;
     }
   }
 
   @override
   bool shouldReportError(ErrorInfo errorInfo) {
-    if (reportAllErrors) return true;
+    if (reportAllErrors) {
+      return true;
+    }
 
     // Report high and critical severity errors
     return errorInfo.severity == ErrorSeverity.high ||
@@ -81,27 +69,16 @@ class DefaultErrorHandler implements ErrorHandler {
 
   @override
   bool shouldAttemptRecovery(ErrorInfo errorInfo) {
-    if (attemptRecoveryForAll) return true;
+    if (attemptRecoveryForAll) {
+      return true;
+    }
 
     // Attempt recovery for non-critical errors
     return errorInfo.severity != ErrorSeverity.critical;
   }
 
   @override
-  Future<bool> attemptRecovery(ErrorInfo errorInfo) async {
-    // For now, we'll consider recovery successful for non-critical errors
-    return errorInfo.severity != ErrorSeverity.critical;
-  }
-
-  void _logError(ErrorInfo errorInfo) {
-    // In a real implementation, this would use a proper logging framework
-    // For now, we'll use print for demonstration
-    print('Error Boundary Error: ${errorInfo.toString()}');
-  }
-
-  Future<void> _reportError(ErrorInfo errorInfo) async {
-    // In a real implementation, this would send the error to external services
-    // For now, we'll just log it
-    print('Reporting error to external service: ${errorInfo.toString()}');
-  }
+  Future<bool> attemptRecovery(ErrorInfo errorInfo) async =>
+      // For now, we'll consider recovery successful for non-critical errors
+      errorInfo.severity != ErrorSeverity.critical;
 }

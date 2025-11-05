@@ -1,11 +1,11 @@
 // Main error boundary widget that catches and handles errors in the widget tree.
 
 import 'package:flutter/material.dart';
+
+import 'error_boundary_controller.dart';
 import 'error_handler.dart';
-import 'error_reporter.dart';
 import 'error_types.dart';
 import 'widgets/error_fallback.dart';
-import 'error_boundary_controller.dart';
 
 /// A widget that catches errors in its child tree and displays a fallback UI.
 ///
@@ -14,10 +14,9 @@ import 'error_boundary_controller.dart';
 class ErrorBoundary extends StatefulWidget {
   /// Creates an error boundary widget.
   const ErrorBoundary({
-    super.key,
     required this.child,
+    super.key,
     this.errorHandler = const DefaultErrorHandler(),
-    this.errorReporter = const DefaultErrorReporter(),
     this.fallbackBuilder,
     this.reportErrors = true,
     this.attemptRecovery = false,
@@ -31,9 +30,6 @@ class ErrorBoundary extends StatefulWidget {
 
   /// The error handler to use for processing errors.
   final ErrorHandler errorHandler;
-
-  /// The error reporter to use for reporting errors to external services.
-  final ErrorReporter errorReporter;
 
   /// Custom fallback builder for creating error UI.
   /// If null, a default error fallback will be used.
@@ -68,6 +64,19 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
     super.initState();
     _controller = widget.controller ?? ErrorBoundaryController();
     _controller.attach(_handleError);
+    debugPrint('ErrorBoundary: Controller attached in initState');
+  }
+
+  @override
+  void didUpdateWidget(ErrorBoundary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the controller changed, update the attachment
+    if (oldWidget.controller != widget.controller) {
+      _controller.detach();
+      _controller = widget.controller ?? ErrorBoundaryController();
+      _controller.attach(_handleError);
+      debugPrint('ErrorBoundary: Controller updated in didUpdateWidget');
+    }
   }
 
   @override
@@ -78,28 +87,27 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('ErrorBoundary.build called, _errorInfo is: $_errorInfo');
     if (_errorInfo != null) {
+      debugPrint('ErrorBoundary: Returning ErrorFallback widget');
       return widget.fallbackBuilder?.call(_errorInfo!) ??
-          ErrorFallback(
-            errorInfo: _errorInfo!,
-            onRetry: _attemptRecovery,
-            onReport: _reportError,
-          );
+          ErrorFallback(errorInfo: _errorInfo!, onRetry: _attemptRecovery);
     }
 
-    return ErrorBoundaryCatcher(
-      onError: _handleError,
-      child: widget.child,
-    );
+    debugPrint('ErrorBoundary: Returning ErrorBoundaryCatcher (no error)');
+    return ErrorBoundaryCatcher(onError: _handleError, child: widget.child);
   }
 
   void _handleError(Object error, StackTrace stackTrace) {
+    debugPrint('ErrorBoundary._handleError called: $error');
+
     if (_errorInfo != null) {
       // Already handling an error, don't handle another one
+      debugPrint('ErrorBoundary: Already handling an error, ignoring new one');
       return;
     }
 
-    final errorInfo = ErrorInfo(
+    final ErrorInfo errorInfo = ErrorInfo(
       error: error,
       stackTrace: stackTrace,
       severity: _determineSeverity(error),
@@ -109,9 +117,18 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       context: widget.context,
     );
 
-    setState(() {
-      _errorInfo = errorInfo;
-    });
+    debugPrint('ErrorBoundary: Setting error info and calling setState');
+    // Use WidgetsBinding to ensure setState is called in the right frame
+    if (mounted) {
+      setState(() {
+        _errorInfo = errorInfo;
+      });
+      debugPrint(
+        'ErrorBoundary: setState called, _errorInfo is now: $_errorInfo',
+      );
+    } else {
+      debugPrint('ErrorBoundary: Widget not mounted, cannot setState');
+    }
 
     // Handle the error asynchronously
     _processError(errorInfo);
@@ -122,55 +139,62 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       // Handle the error
       await widget.errorHandler.handleError(errorInfo);
 
-      // Report the error if enabled
-      if (widget.reportErrors) {
-        await widget.errorReporter.reportError(errorInfo);
-      }
-
       // Attempt recovery if enabled
       if (widget.attemptRecovery && !_isRecovering) {
+        debugPrint('ErrorBoundary: Attempting recovery...');
         await _attemptRecovery();
+        debugPrint('ErrorBoundary: Recovery attempt completed');
       }
-    } catch (e, stackTrace) {
+    } on Object catch (e, stackTrace) {
       // If error processing fails, log it but don't throw
       debugPrint('Error processing failed: $e\n$stackTrace');
     }
   }
 
   Future<void> _attemptRecovery() async {
-    if (_errorInfo == null || _isRecovering) return;
+    debugPrint(
+      'ErrorBoundary._attemptRecovery called, _errorInfo: $_errorInfo, _isRecovering: $_isRecovering',
+    );
+    if (_errorInfo == null || _isRecovering) {
+      debugPrint(
+        'ErrorBoundary._attemptRecovery: Skipping - no error or already recovering',
+      );
+      return;
+    }
 
     setState(() {
       _isRecovering = true;
     });
 
     try {
-      final success = await widget.errorHandler.attemptRecovery(_errorInfo!);
+      final bool success = await widget.errorHandler.attemptRecovery(
+        _errorInfo!,
+      );
+      debugPrint('ErrorBoundary._attemptRecovery: Recovery result: $success');
 
       if (success) {
+        debugPrint(
+          'ErrorBoundary._attemptRecovery: Recovery successful, clearing error',
+        );
         setState(() {
           _errorInfo = null;
           _isRecovering = false;
         });
       } else {
+        debugPrint(
+          'ErrorBoundary._attemptRecovery: Recovery failed, keeping error',
+        );
         setState(() {
           _isRecovering = false;
         });
       }
-    } catch (e) {
+    } on Object catch (e) {
+      debugPrint(
+        'ErrorBoundary._attemptRecovery: Exception during recovery: $e',
+      );
       setState(() {
         _isRecovering = false;
       });
-    }
-  }
-
-  Future<void> _reportError() async {
-    if (_errorInfo == null) return;
-
-    try {
-      await widget.errorReporter.reportError(_errorInfo!);
-    } catch (e) {
-      debugPrint('Failed to report error: $e');
     }
   }
 
@@ -207,9 +231,9 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
 class ErrorBoundaryCatcher extends StatefulWidget {
   /// Creates an error boundary catcher.
   const ErrorBoundaryCatcher({
-    super.key,
     required this.child,
     required this.onError,
+    super.key,
   });
 
   /// The child widget to render.
@@ -224,12 +248,8 @@ class ErrorBoundaryCatcher extends StatefulWidget {
 
 class _ErrorBoundaryCatcherState extends State<ErrorBoundaryCatcher> {
   @override
-  Widget build(BuildContext context) {
-    return ErrorBoundaryWrapper(
-      onError: widget.onError,
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) =>
+      ErrorBoundaryWrapper(onError: widget.onError, child: widget.child);
 }
 
 /// A wrapper widget that catches errors in its child tree.
@@ -239,9 +259,9 @@ class _ErrorBoundaryCatcherState extends State<ErrorBoundaryCatcher> {
 class ErrorBoundaryWrapper extends StatefulWidget {
   /// Creates an error boundary wrapper.
   const ErrorBoundaryWrapper({
-    super.key,
     required this.child,
     required this.onError,
+    super.key,
   });
 
   /// The child widget to render.
@@ -256,12 +276,8 @@ class ErrorBoundaryWrapper extends StatefulWidget {
 
 class _ErrorBoundaryWrapperState extends State<ErrorBoundaryWrapper> {
   @override
-  Widget build(BuildContext context) {
-    return ErrorBoundaryInner(
-      onError: widget.onError,
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) =>
+      ErrorBoundaryInner(onError: widget.onError, child: widget.child);
 }
 
 /// An inner error boundary that actually catches the errors.
@@ -271,9 +287,9 @@ class _ErrorBoundaryWrapperState extends State<ErrorBoundaryWrapper> {
 class ErrorBoundaryInner extends StatefulWidget {
   /// Creates an inner error boundary.
   const ErrorBoundaryInner({
-    super.key,
     required this.child,
     required this.onError,
+    super.key,
   });
 
   /// The child widget to render.
@@ -288,19 +304,17 @@ class ErrorBoundaryInner extends StatefulWidget {
 
 class _ErrorBoundaryInnerState extends State<ErrorBoundaryInner> {
   @override
-  Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        try {
-          return widget.child;
-        } catch (error, stackTrace) {
-          // Notify the parent error boundary
-          widget.onError(error, stackTrace);
+  Widget build(BuildContext context) => Builder(
+    builder: (BuildContext context) {
+      try {
+        return widget.child;
+      } on Object catch (error, stackTrace) {
+        // Notify the parent error boundary
+        widget.onError(error, stackTrace);
 
-          // Return a placeholder widget that will be replaced by the fallback
-          return const SizedBox.shrink();
-        }
-      },
-    );
-  }
+        // Return a placeholder widget that will be replaced by the fallback
+        return const SizedBox.shrink();
+      }
+    },
+  );
 }

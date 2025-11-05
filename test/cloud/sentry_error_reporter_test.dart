@@ -7,7 +7,7 @@ import 'package:mockito/mockito.dart';
 
 import 'sentry_error_reporter_test.mocks.dart';
 
-@GenerateMocks([http.Client, http.Response])
+@GenerateMocks(<Type>[http.Client, http.Response])
 void main() {
   group('SentryErrorReporter', () {
     late MockClient mockHttpClient;
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('should create with custom configuration', () {
-      final customReporter = SentryErrorReporter(
+      final SentryErrorReporter customReporter = SentryErrorReporter(
         dsn: 'https://key:secret@sentry.io/project-id',
         projectId: 'project-id',
         environment: 'staging',
@@ -52,58 +52,81 @@ void main() {
 
     test('should report error successfully', () async {
       when(mockResponse.statusCode).thenReturn(200);
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((_) async => mockResponse);
+      when(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).thenAnswer((_) async => mockResponse);
 
-      final errorInfo = ErrorInfo(
+      final ErrorInfo errorInfo = ErrorInfo(
         error: Exception('Test error'),
         stackTrace: StackTrace.current,
         severity: ErrorSeverity.high,
         type: ErrorType.runtime,
-        timestamp: DateTime(2024, 1, 1),
+        timestamp: DateTime(2024),
         errorSource: 'test',
       );
 
       await reporter.reportError(errorInfo);
 
-      verify(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     test('should report error with context', () async {
       when(mockResponse.statusCode).thenReturn(200);
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((_) async => mockResponse);
+      when(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).thenAnswer((_) async => mockResponse);
 
-      final errorInfo = ErrorInfo(
+      final ErrorInfo errorInfo = ErrorInfo(
         error: Exception('Test error'),
         stackTrace: StackTrace.current,
         severity: ErrorSeverity.high,
         type: ErrorType.runtime,
-        timestamp: DateTime(2024, 1, 1),
+        timestamp: DateTime(2024),
         errorSource: 'test',
       );
 
-      final context = {'screen': 'TestScreen', 'action': 'test'};
+      final Map<String, String> context = <String, String>{
+        'screen': 'TestScreen',
+        'action': 'test',
+      };
 
       await reporter.reportErrorWithContext(errorInfo, context);
 
-      verify(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     test('should handle HTTP error responses', () async {
       when(mockResponse.statusCode).thenReturn(500);
       when(mockResponse.body).thenReturn('Internal Server Error');
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenAnswer((_) async => mockResponse);
+      when(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).thenAnswer((_) async => mockResponse);
 
-      final errorInfo = ErrorInfo(
+      final ErrorInfo errorInfo = ErrorInfo(
         error: Exception('Test error'),
         stackTrace: StackTrace.current,
         severity: ErrorSeverity.high,
@@ -113,17 +136,25 @@ void main() {
       // Should not throw
       await reporter.reportError(errorInfo);
 
-      verify(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     test('should handle HTTP client errors gracefully', () async {
-      when(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .thenThrow(Exception('Network error'));
+      when(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).thenThrow(Exception('Network error'));
 
-      final errorInfo = ErrorInfo(
+      final ErrorInfo errorInfo = ErrorInfo(
         error: Exception('Test error'),
         stackTrace: StackTrace.current,
         severity: ErrorSeverity.high,
@@ -133,28 +164,32 @@ void main() {
       // Should not throw
       await reporter.reportError(errorInfo);
 
-      verify(mockHttpClient.post(any,
-              headers: anyNamed('headers'), body: anyNamed('body')))
-          .called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     test('should set and clear user data', () {
-      reporter.setUserIdentifier('user-123');
-      reporter.setUserProperties({'email': 'test@example.com'});
-
-      // Clear user data
-      reporter.clearUserData();
+      reporter
+        ..setUserIdentifier('user-123')
+        ..setUserProperties(<String, dynamic>{'email': 'test@example.com'})
+        // Clear user data
+        ..clearUserData();
 
       // Should not throw
       expect(() => reporter.setUserIdentifier('new-user'), returnsNormally);
     });
 
     test('should handle user data operations', () {
-      reporter.setUserIdentifier('user-123');
-      reporter.setUserProperties({'email': 'test@example.com'});
-
-      // Clear user data
-      reporter.clearUserData();
+      reporter
+        ..setUserIdentifier('user-123')
+        ..setUserProperties(<String, dynamic>{'email': 'test@example.com'})
+        // Clear user data
+        ..clearUserData();
 
       // Should not throw
       expect(() => reporter.setUserIdentifier('new-user'), returnsNormally);

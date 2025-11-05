@@ -7,7 +7,7 @@ import 'package:mockito/mockito.dart';
 
 import 'composite_error_reporter_test.mocks.dart';
 
-@GenerateMocks([ErrorReporter])
+@GenerateMocks(<Type>[ErrorReporter])
 void main() {
   group('CompositeErrorReporter', () {
     late MockErrorReporter mockReporter1;
@@ -22,9 +22,7 @@ void main() {
       mockReporter3 = MockErrorReporter();
 
       compositeReporter = CompositeErrorReporter(
-        reporters: [mockReporter1, mockReporter2],
-        continueOnFailure: true,
-        parallelReporting: true,
+        reporters: <ErrorReporter>[mockReporter1, mockReporter2],
       );
 
       testErrorInfo = ErrorInfo(
@@ -37,7 +35,10 @@ void main() {
 
     test('should create with correct configuration', () {
       expect(compositeReporter.reporterCount, 2);
-      expect(compositeReporter.reporters, [mockReporter1, mockReporter2]);
+      expect(compositeReporter.reporters, <MockErrorReporter>[
+        mockReporter1,
+        mockReporter2,
+      ]);
     });
 
     test('should report error to all reporters', () async {
@@ -51,18 +52,24 @@ void main() {
     });
 
     test('should report error with context to all reporters', () async {
-      when(mockReporter1.reportErrorWithContext(any, any))
-          .thenAnswer((_) async {});
-      when(mockReporter2.reportErrorWithContext(any, any))
-          .thenAnswer((_) async {});
+      when(
+        mockReporter1.reportErrorWithContext(any, any),
+      ).thenAnswer((_) async {});
+      when(
+        mockReporter2.reportErrorWithContext(any, any),
+      ).thenAnswer((_) async {});
 
-      final context = {'screen': 'TestScreen'};
+      final Map<String, String> context = <String, String>{
+        'screen': 'TestScreen',
+      };
       await compositeReporter.reportErrorWithContext(testErrorInfo, context);
 
-      verify(mockReporter1.reportErrorWithContext(testErrorInfo, context))
-          .called(1);
-      verify(mockReporter2.reportErrorWithContext(testErrorInfo, context))
-          .called(1);
+      verify(
+        mockReporter1.reportErrorWithContext(testErrorInfo, context),
+      ).called(1);
+      verify(
+        mockReporter2.reportErrorWithContext(testErrorInfo, context),
+      ).called(1);
     });
 
     test('should set user identifier on all reporters', () {
@@ -73,7 +80,9 @@ void main() {
     });
 
     test('should set user properties on all reporters', () {
-      final properties = {'email': 'test@example.com'};
+      final Map<String, String> properties = <String, String>{
+        'email': 'test@example.com',
+      };
       compositeReporter.setUserProperties(properties);
 
       verify(mockReporter1.setUserProperties(properties)).called(1);
@@ -88,73 +97,87 @@ void main() {
     });
 
     test(
-        'should handle reporter failures gracefully when continueOnFailure is true',
-        () async {
-      when(mockReporter1.reportError(any))
-          .thenThrow(Exception('Reporter 1 failed'));
-      when(mockReporter2.reportError(any)).thenAnswer((_) async {});
+      'should handle reporter failures gracefully when continueOnFailure is true',
+      () async {
+        when(
+          mockReporter1.reportError(any),
+        ).thenThrow(Exception('Reporter 1 failed'));
+        when(mockReporter2.reportError(any)).thenAnswer((_) async {});
 
-      // Should not throw
-      await compositeReporter.reportError(testErrorInfo);
+        // Should not throw
+        await compositeReporter.reportError(testErrorInfo);
 
-      verify(mockReporter1.reportError(testErrorInfo)).called(1);
-      verify(mockReporter2.reportError(testErrorInfo)).called(1);
-    });
+        verify(mockReporter1.reportError(testErrorInfo)).called(1);
+        verify(mockReporter2.reportError(testErrorInfo)).called(1);
+      },
+    );
 
-    test('should throw when continueOnFailure is false and a reporter fails',
-        () async {
-      final strictReporter = CompositeErrorReporter(
-        reporters: [mockReporter1, mockReporter2],
-        continueOnFailure: false,
-        parallelReporting: true,
-      );
+    test(
+      'should throw when continueOnFailure is false and a reporter fails',
+      () async {
+        final CompositeErrorReporter strictReporter = CompositeErrorReporter(
+          reporters: <ErrorReporter>[mockReporter1, mockReporter2],
+          continueOnFailure: false,
+        );
 
-      when(mockReporter1.reportError(any))
-          .thenThrow(Exception('Reporter 1 failed'));
-      when(mockReporter2.reportError(any)).thenAnswer((_) async {});
+        when(
+          mockReporter1.reportError(any),
+        ).thenThrow(Exception('Reporter 1 failed'));
+        when(mockReporter2.reportError(any)).thenAnswer((_) async {});
 
-      expect(
-        () => strictReporter.reportError(testErrorInfo),
-        throwsA(isA<Exception>()),
-      );
-    });
+        expect(
+          () => strictReporter.reportError(testErrorInfo),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
 
     test('should work with empty reporters list', () async {
-      final emptyReporter = CompositeErrorReporter(reporters: []);
+      final CompositeErrorReporter emptyReporter = CompositeErrorReporter(
+        reporters: <ErrorReporter>[],
+      );
 
       // Should not throw
       await emptyReporter.reportError(testErrorInfo);
-      emptyReporter.setUserIdentifier('user-123');
-      emptyReporter.setUserProperties({'test': 'value'});
-      emptyReporter.clearUserData();
+      emptyReporter
+        ..setUserIdentifier('user-123')
+        ..setUserProperties(<String, dynamic>{'test': 'value'})
+        ..clearUserData();
     });
 
     test('should add reporter', () {
-      final newComposite = compositeReporter.addReporter(mockReporter3);
+      final CompositeErrorReporter newComposite = compositeReporter.addReporter(
+        mockReporter3,
+      );
 
       expect(newComposite.reporterCount, 3);
-      expect(newComposite.reporters,
-          [mockReporter1, mockReporter2, mockReporter3]);
+      expect(newComposite.reporters, <MockErrorReporter>[
+        mockReporter1,
+        mockReporter2,
+        mockReporter3,
+      ]);
       expect(compositeReporter.reporterCount, 2); // Original unchanged
     });
 
     test('should remove reporter', () {
-      final newComposite = compositeReporter.removeReporter(mockReporter1);
+      final CompositeErrorReporter newComposite = compositeReporter
+          .removeReporter(mockReporter1);
 
       expect(newComposite.reporterCount, 1);
-      expect(newComposite.reporters, [mockReporter2]);
+      expect(newComposite.reporters, <MockErrorReporter>[mockReporter2]);
       expect(compositeReporter.reporterCount, 2); // Original unchanged
     });
 
     test('should create with different settings', () {
-      final newComposite = compositeReporter.withSettings(
-        continueOnFailure: false,
-        parallelReporting: false,
-      );
+      final CompositeErrorReporter newComposite = compositeReporter
+          .withSettings(continueOnFailure: false, parallelReporting: false);
 
       expect(newComposite.continueOnFailure, false);
       expect(newComposite.parallelReporting, false);
-      expect(newComposite.reporters, [mockReporter1, mockReporter2]);
+      expect(newComposite.reporters, <MockErrorReporter>[
+        mockReporter1,
+        mockReporter2,
+      ]);
     });
 
     test('should handle individual reporter failures gracefully', () {
@@ -169,7 +192,9 @@ void main() {
     });
 
     test('should work with single reporter', () async {
-      final singleReporter = CompositeErrorReporter(reporters: [mockReporter1]);
+      final CompositeErrorReporter singleReporter = CompositeErrorReporter(
+        reporters: <ErrorReporter>[mockReporter1],
+      );
 
       when(mockReporter1.reportError(any)).thenAnswer((_) async {});
 
@@ -179,7 +204,7 @@ void main() {
     });
 
     test('should maintain immutability of reporters list', () {
-      final reporters = compositeReporter.reporters;
+      final List<ErrorReporter> reporters = compositeReporter.reporters;
 
       expect(() => reporters.add(mockReporter3), throwsUnsupportedError);
     });

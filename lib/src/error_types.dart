@@ -23,9 +23,8 @@ class BoundaryError {
   final DateTime? timestamp;
 
   @override
-  String toString() {
-    return 'BoundaryError(error: $error, source: $errorSource, timestamp: $timestamp)';
-  }
+  String toString() =>
+      'BoundaryError(error: $error, source: $errorSource, timestamp: $timestamp)';
 }
 
 /// Represents the severity level of an error.
@@ -103,7 +102,6 @@ class ErrorInfo {
   final Map<String, dynamic>? userData;
 
   @override
-  String toString() {
-    return 'ErrorInfo(error: $error, severity: $severity, type: $type, source: $errorSource)';
-  }
+  String toString() =>
+      'ErrorInfo(error: $error, severity: $severity, type: $type, source: $errorSource)';
 }

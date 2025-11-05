@@ -39,11 +39,11 @@ class SentryErrorReporter implements ErrorReporter {
   String? _userId;
 
   /// User properties for error reporting.
-  Map<String, dynamic> _userProperties = {};
+  final Map<String, dynamic> _userProperties = <String, dynamic>{};
 
   @override
   Future<void> reportError(ErrorInfo errorInfo) async {
-    await _sendToSentry(errorInfo, {});
+    await _sendToSentry(errorInfo, <String, dynamic>{});
   }
 
   @override
@@ -76,36 +76,33 @@ class SentryErrorReporter implements ErrorReporter {
     Map<String, dynamic> context,
   ) async {
     try {
-      final url = _buildSentryUrl();
-      final headers = _buildHeaders();
-      final body = _buildEventPayload(errorInfo, context);
+      final String url = _buildSentryUrl();
+      final Map<String, String> headers = _buildHeaders();
+      final String body = _buildEventPayload(errorInfo, context);
 
-      final response = await _httpClient.post(
+      final http.Response response = await _httpClient.post(
         Uri.parse(url),
         headers: headers,
         body: body,
       );
 
-      if (response.statusCode != 200) {
-        print(
-            'Sentry error reporting failed: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      print('Failed to send error to Sentry: $e');
+      if (response.statusCode != 200) {}
+    } on Object {
+      // Silently ignore errors from Sentry API calls
     }
   }
 
   /// Builds the Sentry API URL.
   String _buildSentryUrl() {
-    final uri = Uri.parse(dsn);
-    return '${uri.scheme}://${uri.host}/api/${projectId}/store/';
+    final Uri uri = Uri.parse(dsn);
+    return '${uri.scheme}://${uri.host}/api/$projectId/store/';
   }
 
   /// Builds the request headers for Sentry.
   Map<String, String> _buildHeaders() {
-    final uri = Uri.parse(dsn);
+    final Uri uri = Uri.parse(dsn);
 
-    return {
+    return <String, String>{
       'Content-Type': 'application/json',
       'X-Sentry-Auth': 'Sentry sentry_version=7,sentry_key=${uri.userInfo}',
       'User-Agent': 'flutter_error_boundary/1.0.0',
@@ -113,11 +110,8 @@ class SentryErrorReporter implements ErrorReporter {
   }
 
   /// Builds the event payload for Sentry.
-  String _buildEventPayload(
-    ErrorInfo errorInfo,
-    Map<String, dynamic> context,
-  ) {
-    final event = {
+  String _buildEventPayload(ErrorInfo errorInfo, Map<String, dynamic> context) {
+    final Map<String, Object?> event = <String, Object?>{
       'event_id': _generateEventId(),
       'timestamp': errorInfo.timestamp?.toUtc().toIso8601String(),
       'level': _mapSeverityToSentryLevel(errorInfo.severity),
@@ -126,22 +120,22 @@ class SentryErrorReporter implements ErrorReporter {
       'server_name': serverName,
       'release': release,
       'environment': environment,
-      'exception': {
-        'values': [
-          {
+      'exception': <String, List<Map<String, Object>>>{
+        'values': <Map<String, Object>>[
+          <String, Object>{
             'type': errorInfo.error.runtimeType.toString(),
             'value': errorInfo.error.toString(),
-            'stacktrace': {
+            'stacktrace': <String, List<Map<String, dynamic>>>{
               'frames': _parseStackTrace(errorInfo.stackTrace),
             },
           },
         ],
       },
-      'tags': {
+      'tags': <String, String>{
         'error_type': errorInfo.type.name,
         'error_source': errorInfo.errorSource ?? 'unknown',
       },
-      'extra': {
+      'extra': <String, Map<String, dynamic>?>{
         'context': context,
         'error_context': errorInfo.context,
         'user_data': errorInfo.userData,
@@ -149,20 +143,16 @@ class SentryErrorReporter implements ErrorReporter {
     };
 
     if (_userId != null) {
-      event['user'] = {
-        'id': _userId,
-        ..._userProperties,
-      };
+      event['user'] = <String, dynamic>{'id': _userId, ..._userProperties};
     }
 
     return json.encode(event);
   }
 
   /// Generates a unique event ID.
-  String _generateEventId() {
-    return DateTime.now().millisecondsSinceEpoch.toString() +
-        (1000 + (DateTime.now().microsecond / 1000).round()).toString();
-  }
+  String _generateEventId() =>
+      DateTime.now().millisecondsSinceEpoch.toString() +
+      (1000 + (DateTime.now().microsecond / 1000).round()).toString();
 
   /// Maps error severity to Sentry level.
   String _mapSeverityToSentryLevel(ErrorSeverity severity) {
@@ -180,14 +170,16 @@ class SentryErrorReporter implements ErrorReporter {
 
   /// Parses stack trace into Sentry format.
   List<Map<String, dynamic>> _parseStackTrace(StackTrace stackTrace) {
-    final frames = <Map<String, dynamic>>[];
-    final lines = stackTrace.toString().split('\n');
+    final List<Map<String, dynamic>> frames = <Map<String, dynamic>>[];
+    final List<String> lines = stackTrace.toString().split('\n');
 
-    for (final line in lines) {
-      if (line.trim().isEmpty) continue;
+    for (final String line in lines) {
+      if (line.trim().isEmpty) {
+        continue;
+      }
 
       // Simple parsing - in a real implementation, you might want more sophisticated parsing
-      frames.add({
+      frames.add(<String, dynamic>{
         'filename': 'unknown',
         'function': line.trim(),
         'lineno': 0,

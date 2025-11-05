@@ -4,45 +4,47 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('ErrorTypes', () {
     test('BoundaryError should create with required parameters', () {
-      final error = Exception('Test error');
-      final stackTrace = StackTrace.current;
-      final boundaryError = BoundaryError(
+      final Exception error = Exception('Test error');
+      final StackTrace stackTrace = StackTrace.current;
+      final BoundaryError boundaryError = BoundaryError(
         error: error,
         stackTrace: stackTrace,
         errorSource: 'TestWidget',
-        timestamp: DateTime(2024, 1, 1),
+        timestamp: DateTime(2024),
       );
 
       expect(boundaryError.error, equals(error));
       expect(boundaryError.stackTrace, equals(stackTrace));
       expect(boundaryError.errorSource, equals('TestWidget'));
-      expect(boundaryError.timestamp, equals(DateTime(2024, 1, 1)));
+      expect(boundaryError.timestamp, equals(DateTime(2024)));
     });
 
-    test('BoundaryError should have default values for optional parameters',
-        () {
-      final error = Exception('Test error');
-      final stackTrace = StackTrace.current;
-      final boundaryError = BoundaryError(
-        error: error,
-        stackTrace: stackTrace,
-      );
+    test(
+      'BoundaryError should have default values for optional parameters',
+      () {
+        final Exception error = Exception('Test error');
+        final StackTrace stackTrace = StackTrace.current;
+        final BoundaryError boundaryError = BoundaryError(
+          error: error,
+          stackTrace: stackTrace,
+        );
 
-      expect(boundaryError.errorSource, isNull);
-      expect(boundaryError.timestamp, isNull);
-    });
+        expect(boundaryError.errorSource, isNull);
+        expect(boundaryError.timestamp, isNull);
+      },
+    );
 
     test('BoundaryError toString should include error information', () {
-      final error = Exception('Test error');
-      final stackTrace = StackTrace.current;
-      final boundaryError = BoundaryError(
+      final Exception error = Exception('Test error');
+      final StackTrace stackTrace = StackTrace.current;
+      final BoundaryError boundaryError = BoundaryError(
         error: error,
         stackTrace: stackTrace,
         errorSource: 'TestWidget',
-        timestamp: DateTime(2024, 1, 1),
+        timestamp: DateTime(2024),
       );
 
-      final string = boundaryError.toString();
+      final String string = boundaryError.toString();
       expect(string, contains('Test error'));
       expect(string, contains('TestWidget'));
       expect(string, contains('2024-01-01'));
@@ -73,17 +75,17 @@ void main() {
 
   group('ErrorInfo', () {
     test('should create with required parameters', () {
-      final error = Exception('Test error');
-      final stackTrace = StackTrace.current;
-      final errorInfo = ErrorInfo(
+      final Exception error = Exception('Test error');
+      final StackTrace stackTrace = StackTrace.current;
+      final ErrorInfo errorInfo = ErrorInfo(
         error: error,
         stackTrace: stackTrace,
         severity: ErrorSeverity.high,
         type: ErrorType.runtime,
         errorSource: 'TestWidget',
-        timestamp: DateTime(2024, 1, 1),
-        context: {'screen': 'test'},
-        userData: {'userId': '123'},
+        timestamp: DateTime(2024),
+        context: <String, dynamic>{'screen': 'test'},
+        userData: <String, dynamic>{'userId': '123'},
       );
 
       expect(errorInfo.error, equals(error));
@@ -91,15 +93,15 @@ void main() {
       expect(errorInfo.severity, equals(ErrorSeverity.high));
       expect(errorInfo.type, equals(ErrorType.runtime));
       expect(errorInfo.errorSource, equals('TestWidget'));
-      expect(errorInfo.timestamp, equals(DateTime(2024, 1, 1)));
-      expect(errorInfo.context, equals({'screen': 'test'}));
-      expect(errorInfo.userData, equals({'userId': '123'}));
+      expect(errorInfo.timestamp, equals(DateTime(2024)));
+      expect(errorInfo.context, equals(<String, String>{'screen': 'test'}));
+      expect(errorInfo.userData, equals(<String, String>{'userId': '123'}));
     });
 
     test('should have default values for optional parameters', () {
-      final error = Exception('Test error');
-      final stackTrace = StackTrace.current;
-      final errorInfo = ErrorInfo(
+      final Exception error = Exception('Test error');
+      final StackTrace stackTrace = StackTrace.current;
+      final ErrorInfo errorInfo = ErrorInfo(
         error: error,
         stackTrace: stackTrace,
         severity: ErrorSeverity.medium,
@@ -113,9 +115,9 @@ void main() {
     });
 
     test('toString should include error information', () {
-      final error = Exception('Test error');
-      final stackTrace = StackTrace.current;
-      final errorInfo = ErrorInfo(
+      final Exception error = Exception('Test error');
+      final StackTrace stackTrace = StackTrace.current;
+      final ErrorInfo errorInfo = ErrorInfo(
         error: error,
         stackTrace: stackTrace,
         severity: ErrorSeverity.high,
@@ -123,7 +125,7 @@ void main() {
         errorSource: 'TestWidget',
       );
 
-      final string = errorInfo.toString();
+      final String string = errorInfo.toString();
       expect(string, contains('Test error'));
       expect(string, contains('high'));
       expect(string, contains('runtime'));

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_error_boundary/flutter_error_boundary.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ErrorFallback', () {
@@ -13,37 +13,33 @@ void main() {
         severity: ErrorSeverity.high,
         type: ErrorType.runtime,
         errorSource: 'TestWidget',
-        timestamp: DateTime(2024, 1, 1, 12, 0, 0),
-        context: {'screen': 'test'},
-        userData: {'userId': '123'},
+        timestamp: DateTime(2024, 1, 1, 12),
+        context: <String, dynamic>{'screen': 'test'},
+        userData: <String, dynamic>{'userId': '123'},
       );
     });
 
-    testWidgets('should display error icon', (tester) async {
+    testWidgets('should display error icon', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorFallback(errorInfo: errorInfo),
-        ),
+        MaterialApp(home: ErrorFallback(errorInfo: errorInfo)),
       );
 
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
-    testWidgets('should display error message', (tester) async {
+    testWidgets('should display error message', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorFallback(errorInfo: errorInfo),
-        ),
+        MaterialApp(home: ErrorFallback(errorInfo: errorInfo)),
       );
 
       expect(find.text('Something went wrong'), findsOneWidget);
     });
 
-    testWidgets('should not show error details by default', (tester) async {
+    testWidgets('should not show error details by default', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorFallback(errorInfo: errorInfo),
-        ),
+        MaterialApp(home: ErrorFallback(errorInfo: errorInfo)),
       );
 
       expect(find.text('Error Details:'), findsNothing);
@@ -51,14 +47,12 @@ void main() {
       expect(find.text('Severity: high'), findsNothing);
     });
 
-    testWidgets('should show error details when showDetails is true',
-        (tester) async {
+    testWidgets('should show error details when showDetails is true', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: ErrorFallback(
-            errorInfo: errorInfo,
-            showDetails: true,
-          ),
+          home: ErrorFallback(errorInfo: errorInfo, showDetails: true),
         ),
       );
 
@@ -69,8 +63,9 @@ void main() {
       expect(find.text('Time: 2024-01-01 12:00:00.000'), findsOneWidget);
     });
 
-    testWidgets('should show retry button when onRetry is provided',
-        (tester) async {
+    testWidgets('should show retry button when onRetry is provided', (
+      WidgetTester tester,
+    ) async {
       bool retryCalled = false;
 
       await tester.pumpWidget(
@@ -89,19 +84,19 @@ void main() {
       expect(retryCalled, isTrue);
     });
 
-    testWidgets('should not show retry button when onRetry is not provided',
-        (tester) async {
+    testWidgets('should not show retry button when onRetry is not provided', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorFallback(errorInfo: errorInfo),
-        ),
+        MaterialApp(home: ErrorFallback(errorInfo: errorInfo)),
       );
 
       expect(find.text('Retry'), findsNothing);
     });
 
-    testWidgets('should show report button when onReport is provided',
-        (tester) async {
+    testWidgets('should show report button when onReport is provided', (
+      WidgetTester tester,
+    ) async {
       bool reportCalled = false;
 
       await tester.pumpWidget(
@@ -120,38 +115,40 @@ void main() {
       expect(reportCalled, isTrue);
     });
 
-    testWidgets('should not show report button when onReport is not provided',
-        (tester) async {
+    testWidgets('should not show report button when onReport is not provided', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorFallback(errorInfo: errorInfo),
-        ),
+        MaterialApp(home: ErrorFallback(errorInfo: errorInfo)),
       );
 
       expect(find.text('Report'), findsNothing);
     });
 
     testWidgets(
-        'should show both retry and report buttons when both callbacks are provided',
-        (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorFallback(
-            errorInfo: errorInfo,
-            onRetry: () {},
-            onReport: () {},
+      'should show both retry and report buttons when both callbacks are provided',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: ErrorFallback(
+              errorInfo: errorInfo,
+              onRetry: () {},
+              onReport: () {},
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Retry'), findsOneWidget);
-      expect(find.text('Report'), findsOneWidget);
-      expect(find.byType(ElevatedButton), findsOneWidget);
-      expect(find.byType(OutlinedButton), findsOneWidget);
-    });
+        expect(find.text('Retry'), findsOneWidget);
+        expect(find.text('Report'), findsOneWidget);
+        expect(find.byType(ElevatedButton), findsOneWidget);
+        expect(find.byType(OutlinedButton), findsOneWidget);
+      },
+    );
 
-    testWidgets('should handle null error source gracefully', (tester) async {
-      final errorInfoWithoutSource = ErrorInfo(
+    testWidgets('should handle null error source gracefully', (
+      WidgetTester tester,
+    ) async {
+      final ErrorInfo errorInfoWithoutSource = ErrorInfo(
         error: Exception('Test error'),
         stackTrace: StackTrace.current,
         severity: ErrorSeverity.medium,
@@ -170,8 +167,10 @@ void main() {
       expect(find.text('Source: TestWidget'), findsNothing);
     });
 
-    testWidgets('should handle null timestamp gracefully', (tester) async {
-      final errorInfoWithoutTimestamp = ErrorInfo(
+    testWidgets('should handle null timestamp gracefully', (
+      WidgetTester tester,
+    ) async {
+      final ErrorInfo errorInfoWithoutTimestamp = ErrorInfo(
         error: Exception('Test error'),
         stackTrace: StackTrace.current,
         severity: ErrorSeverity.medium,
@@ -192,29 +191,29 @@ void main() {
   });
 
   group('ErrorDisplay', () {
-    testWidgets('should display error message', (tester) async {
+    testWidgets('should display error message', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorDisplay(message: 'Test error message'),
-        ),
+        const MaterialApp(home: ErrorDisplay(message: 'Test error message')),
       );
 
       expect(find.text('Test error message'), findsOneWidget);
     });
 
-    testWidgets('should display default error icon', (tester) async {
+    testWidgets('should display default error icon', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorDisplay(message: 'Test error message'),
-        ),
+        const MaterialApp(home: ErrorDisplay(message: 'Test error message')),
       );
 
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
-    testWidgets('should display custom error icon', (tester) async {
+    testWidgets('should display custom error icon', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: ErrorDisplay(
             message: 'Test error message',
             icon: Icons.warning,
@@ -226,12 +225,11 @@ void main() {
       expect(find.byIcon(Icons.error_outline), findsNothing);
     });
 
-    testWidgets('should use default color when no color is specified',
-        (tester) async {
+    testWidgets('should use default color when no color is specified', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorDisplay(message: 'Test error message'),
-        ),
+        const MaterialApp(home: ErrorDisplay(message: 'Test error message')),
       );
 
       // The default color should be applied
@@ -239,15 +237,14 @@ void main() {
       expect(find.byType(Text), findsOneWidget);
     });
 
-    testWidgets('should use custom color when specified', (tester) async {
-      const customColor = Colors.blue;
+    testWidgets('should use custom color when specified', (
+      WidgetTester tester,
+    ) async {
+      const MaterialColor customColor = Colors.blue;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorDisplay(
-            message: 'Test error message',
-            color: customColor,
-          ),
+        const MaterialApp(
+          home: ErrorDisplay(message: 'Test error message', color: customColor),
         ),
       );
 
@@ -256,21 +253,19 @@ void main() {
       expect(find.byType(Text), findsOneWidget);
     });
 
-    testWidgets('should center content', (tester) async {
+    testWidgets('should center content', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorDisplay(message: 'Test error message'),
-        ),
+        const MaterialApp(home: ErrorDisplay(message: 'Test error message')),
       );
 
       expect(find.byType(Center), findsOneWidget);
     });
 
-    testWidgets('should arrange icon and text vertically', (tester) async {
+    testWidgets('should arrange icon and text vertically', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ErrorDisplay(message: 'Test error message'),
-        ),
+        const MaterialApp(home: ErrorDisplay(message: 'Test error message')),
       );
 
       expect(find.byType(Column), findsOneWidget);
