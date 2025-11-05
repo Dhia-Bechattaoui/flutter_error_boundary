@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4] - 2025-01-05
+
+### Changed
+- **Git Configuration**: Removed `pubspec.lock` files from version control and added to `.gitignore`
+
+### Enhanced
+- **README**: Set example GIF width to 300 pixels for better display
+
 ## [0.0.3] - 2025-01-05
 
 ### Fixed

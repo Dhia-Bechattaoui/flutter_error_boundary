@@ -2,7 +2,7 @@
 
 A Flutter package that provides error boundary widgets to catch and handle errors gracefully in Flutter applications, preventing crashes and providing fallback UI when errors occur.
 
-![Example](assets/example.gif)
+<img src="assets/example.gif" width="300" alt="Example">
 
 ## Features
 
