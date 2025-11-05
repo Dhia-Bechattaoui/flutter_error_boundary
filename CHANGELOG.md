@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5] - 2025-11-05
+
+### Changed
+- **CI/CD**: Updated Flutter version in GitHub Actions workflows from 3.16.0 to 3.35.7 to support Dart SDK 3.8.0+ requirement
+
 ## [0.0.4] - 2025-01-05
 
 ### Changed
